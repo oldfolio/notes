@@ -1,0 +1,16 @@
+#!/bin/sh
+##  Returns a character string starting with a special character
+##  and followed by other characters chosen from upper and lower
+##  case letters and from numbers. I use it to generate passwords.
+##  This script works on both OpenBSD and Linux.
+echo " "
+echo "Enter a special character approved by the site's password overlords:"
+read sc
+echo " "
+echo "Enter the desired password length:"
+read lngth1
+lngth="$(($lngth1 - 1))"
+echo " "
+echo "Your new password:"
+echo -n "$sc"; tr -dC A-Za-z0-9 </dev/urandom | dd count=1 bs=$lngth 2>/dev/null; echo
+echo " "

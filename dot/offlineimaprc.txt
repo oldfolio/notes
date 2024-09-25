@@ -1,0 +1,18 @@
+# Minimal ~/.offlineimaprc
+
+[general]
+accounts = oldfolio
+
+[Account oldfolio]
+localrepository = Local
+remoterepository = Remote
+
+[Repository Local]
+type = Maildir
+localfolders = ~/Email-Repository
+
+[Repository Remote]
+type = IMAP
+sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+remotehost = imap.server.tld
+remoteuser = user@domain.tld

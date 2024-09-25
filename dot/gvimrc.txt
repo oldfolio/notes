@@ -1,0 +1,14 @@
+set lines=30
+set columns=80
+setlocal spell spelllang=en_us
+"set guifont=Monospace\ 11
+"set guifont=Linux\ Libertine\ Mono\ O\ 12
+set guifont=Gabriele\ Dark\ Ribbon\ FG\ Regular\ 12
+"set guifont=Liberation\ Mono\ 13
+
+" Formatting to make your notebook easier to read
+set wrap "Do not add EOL when text continues on next line
+set linebreak "Break at end of word, not last column of screen
+set textwidth=0 "Disable a fixed line length
+set wrapmargin=1 "Set number of characters from screen edge for wrapping
+

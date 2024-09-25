@@ -1,0 +1,24 @@
+# nginx proxy configuration
+# server to which you are directing traffic
+
+server {
+  listen 80;
+  listen [::]:80;
+  root /var/www/proxy;
+  server_name hostname.tld;
+  location / {
+    proxy_set_header Host $server_name;
+    proxy_pass http://xxx.xxx.xxx.xxx:8080;
+  }
+}
+
+# nginx PROXIED configuration
+# server on which site really lives
+
+server {
+  listen 8080;
+  listen [::]:8080;
+  root /var/www/proxy;
+  server_name hostname.tld;
+}
+

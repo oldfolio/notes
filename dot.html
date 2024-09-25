@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: Dot Files</title>
+</head>
+
+<body>
+<h1>Dot Files</h1>
+<p>A collection of configuration files</p>
+<h4>System-wide</h4>
+<p>If you need to force apt to use IPv4:</p>
+<pre>
+/etc/apt/apt.conf.d/<a href="dot/99force-ipv4.txt">99force-ipv4</a>
+</pre>
+<p>Cloudflare's Debian Mirrors:</p>
+<pre>
+/etc/apt/<a href="dot/sources.list.txt">sources.list</a>
+</pre>
+<p>Font configuration:</p>
+<pre>
+/etc/fonts/<a href="dot/fonts-local.conf.txt">local.conf</a>
+</pre>
+<p>Additional IP addresses on an OVH VPS:</p>
+<pre>
+/etc/network/interfaces.d/<a href="dot/60-additional-ips.cfg.txt">60-additional-ips.cfg</a>
+</pre>
+<p>Minimal site configuration for Cloudflare SSL on nginx:</p>
+<pre>
+/etc/nginx/sites-enabled/<a href="dot/CF-SSL-Site.txt">site-config-cf-ssl</a> or
+/usr/local/etc/nginx/sites-enabled/<a href="dot/CF-SSL-Site.txt">site-config-cf-ssl</a>
+</pre>
+<p><a href="dot/nginx-proxy-conf.txt">Site configuration files</a> for nginx proxy</p>
+<p>To change the nameservers that appear in <strong>/etc/resolv.conf</strong>, add the following line to /etc/dhcp/dhclient.conf:</p>
+<pre>
+supersede domain-name-servers 74.82.42.42, 1.1.1.1;
+</pre>
+<p>If you wish to use U2F keys on a Debian-based system, you may need to add the following file:</p>
+<pre>
+/etc/udev/rules.d/<a href="dot/70-u2f.rules">70-u2f.rules</a>
+</pre>
+<p>The above file is a copy of a working rules file that I have used under Debian 8 and 9. To make sure you have the latest version of the file, you should grab it from <a href="https://github.com/Yubico/libu2f-host/blob/master/70-u2f.rules">Yubico’s GitHub page</a>. I have not needed to add this file under Debian 10.</p>
+<p>CSS example</p>
+<pre>
+/var/www/<a href="dot/simple.css.txt">simple.css</a>
+</pre>
+<h4>For my home directory</h4>
+<pre>
+~/.dosbox/<a href="dot/dosbox.conf.txt">dosbox.conf</a>
+</pre>
+<pre>
+~/.emacs.d/<a href="dot/emacs.d-init.el.txt">init.el</a>
+~/.emacs.d/el/<a href="dot/typopunct.el.txt">typopunct.el</a>
+~/.emacs.d/el/<a href="dot/gopher.el.txt">gopher.el</a>
+</pre>
+<pre>
+~/<a href="dot/forward.txt">.forward</a>
+</pre>
+<pre>
+~/.gnupg/<a href="dot/gpg-agent.conf.txt">gpg-agent.conf</a>
+</pre>
+<p>Whenever you make changes to gpg-agent.conf, you should reload the agent.</p>
+<pre>
+$ gpg-connect-agent reloadagent /bye
+</pre>
+<pre>
+~/.gnupg/<a href="dot/gpg.conf.txt">gpg.conf</a>
+</pre>
+<pre>
+~/<a href="dot/kshrc.txt">.kshrc</a>
+</pre>
+<pre>
+~/<a href="dot/mkshrc.txt">.mkshrc</a> additions
+</pre>
+<pre>
+~/<a href="dot/offlineimaprc.txt">.offlineimaprc</a>
+</pre>
+<pre>
+~/<a href="dot/profile.txt">.profile</a>
+</pre>
+<pre>
+~/.ssh/<a href="dot/authorized_keys.txt">authorized_keys</a>
+~/.ssh/<a href="dot/ssh-config.txt">config</a>
+</pre>
+<pre>
+~/<a href="dot/tcshrc.txt">.tcshrc</a>
+</pre>
+<pre>
+~/.vim/<a href="dot/gvimrc.txt">gvimrc</a>
+~/.vim/<a href="dot/vimrc.txt">vimrc</a>
+</pre>
+<pre>
+~/<a href="dot/Xresources.txt">.Xresources</a>
+</pre>
+<h4>Scripts</h4>
+<pre>
+<a href="dot/freebsd-cpu-info.sh.txt">freebsd-cpu-info.sh</a>
+</pre>
+<pre>
+<a href="dot/mkpasswd.sh.txt">mkpasswd.sh</a>
+</pre>
+<pre>
+<a href="dot/shred.sh.txt">shred.sh</a>
+</pre>
+<pre>
+<a href="dot/totp-tl.sh.txt">totp-tl.sh</a>
+</pre>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+</body>
+
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: DNS</title>
+</head>
+
+<body>
+<h1>DNS Notes</h1>
+<h3>Public DNS Resolvers</h3>
+<p>View performance statistics for public DNS resolvers at <a href="https://www.dnsperf.com/#!dns-resolvers">DNSPerf</a>. The statistics reported at <a href="https://www.dnsperf.com/#!dns-resolvers">DNSPerf</a> tend to be very similar to the results I get using the <a href="https://code.google.com/archive/p/namebench/">namebench</a> tool. You may also find it useful to look at NixNet's <a href="https://docs.nixnet.services/DNS" rel="nofollow" target="_blank">page about DNS</a>. It lists their DNS resolvers along with useful general information.</p>
+<p>Under Linux there are a number of services that seem to like over-writing /etc/resolv.conf. Once you have edited /etc/resolv.conf to your liking you can prevent it from being over-written by setting the immutable bit.</p>
+<pre>
+# chattr +i /etc/resolv.conf
+</pre>
+<p>Under OpenBSD, change the nameservers in /etc/resolv.conf by using the <strong>route</strong> command:</p>
+<pre>
+# route nameserver vio0 74.82.42.42 1.1.1.1
+</pre>
+<p>The name servers should be listed in <em>reverse</em> priority. So, in the above example, 1.1.1.1 will be the first nameserver listed in /etc/resolv.conf.</p>
+<h4>AdGuard</h4>
+<pre>
+94.140.14.14
+94.140.15.15
+2a10:50c0::ad1:ff
+2a10:50c0::ad2:ff
+
+https://dns.adguard.com/dns-query
+
+dns.adguard.com
+</pre>
+<h4>CloudFlare</h4>
+<pre>
+1.1.1.1
+1.0.0.1
+2606:4700:4700::1111
+2606:4700:4700::1001
+
+https://cloudflare-dns.com/dns-query
+
+one.one.one.one OR 1dot1dot1dot1.cloudflare-dns.com
+</pre>
+<h4>DNS0.EU</h4>
+<pre>
+193.110.81.0
+185.253.5.0
+2a0f:fc80::
+2a0f:fc81::
+
+https://dns0.eu/
+
+dns0.eu
+</pre>
+<h4>Dyn</h4>
+<pre>
+216.146.35.35
+216.146.36.36
+</pre>
+<h4>FreeDNS.zone</h4>
+<pre>
+172.104.237.57  (Frankfurt, Germany)
+172.104.49.100  (Singapore)
+37.235.1.174    (Vienna, Austria)
+37.235.1.177    (Vienna, Austria)
+45.33.97.5      (Atlanta, GA, USA)
+</pre>
+<h4>Google</h4>
+<pre>
+8.8.8.8
+8.8.4.4
+2001:4860:4860::8888
+2001:4860:4860::8844
+
+https://dns.google/dns-query
+
+dns.google
+</pre>
+<h4>Hurricane Electric</h4>
+<pre>
+74.82.42.42
+2001:470:20::2
+
+https://ordns.he.net/dns-query
+
+ordns.he.net
+</pre>
+<h4>Namecheap SafeServe</h4>
+<pre>
+198.54.117.10
+198.54.117.11
+</pre>
+<h4>NextDNS</h4>
+<pre>
+45.90.28.219
+45.90.30.219
+</pre>
+<h4>OpenDNS</h4>
+<pre>
+208.67.222.222
+208.67.220.220
+2620:0:ccc::2
+2620:0:ccd::2
+
+https://doh.opendns.com/dns-query
+</pre>
+<h4>OpenNIC Project</h4>
+<p>Go to <a href="https://www.opennic.org">https://www.opennic.org</a> to see which of their DNS resolvers are closest to you. OpenNIC servers periodically go down and occasionally just disappear. Servers that have worked for me (in North America) are:</p>
+<pre>
+192.3.165.37
+172.98.193.42
+</pre>
+<p>Of course, keep in mind what I noted above, that OpenNIC servers periodically go down and occasionally just disappear. Yes, I thought that point needed to be repeated.</p>
+<h4>Quad9</h4>
+<pre>
+9.9.9.9
+149.112.112.112
+2620:fe::fe
+
+https://dns.quad9.net/dns-query
+</pre>
+<h4>Yandex Basic</h4>
+<pre>
+77.88.8.8
+77.88.8.1
+2a02:6b8::feed:0ff
+2a02:6b8:0:1::feed:0ff
+</pre>
+<h4>Yandex Safe</h4>
+<pre>
+77.88.8.88
+77.88.8.2
+2a02:6b8::feed:bad
+2a02:6b8:0:1::feed:bad
+</pre>
+<p>I sometimes mix DNS resolvers from different providers:</p>
+<pre>
+nameserver 45.33.97.5  # FreeDNS.zone
+nameserver 74.82.42.42 # Hurricane Electric
+</pre>
+<p>For more public DNS resolvers, see <a href="https://www.publicdns.xyz">Public DNS</a>.</p>
+<h4>DNS over HTTPS</h4>
+<p>Mozilla recently added to Firefox the option to do DNS lookups over HTTPS, but the default DNS provider is Cloudflare. If you wish to avoid Cloudflare, you can use <a href="https://libredns.gr/">LibreDNS</a> instead.</p>
+<pre>
+Enable DNS over HTTPS
+  Use default: https://mozilla.cloudflare-dns.com/dns-query
+  Custom: https://cloudflare-dns.com/dns-query (Cloudflare)
+          https://ordns.he.net/dns-query (Hurricane Electric)
+          https://doh.libredns.gr/dns-query
+</pre>
+<p>There is a list of publicly available DNS over HTTPS resolvers at <a href="https://github.com/curl/curl/wiki/DNS-over-HTTPS#publicly-available-servers">Github</a>.</p>
+
+<hr>
+<h3>Free DNS Hosting</h3>
+<p><a href="https://1984hosting.com/">1984</a>: Unlimited zones; cannot find limits on records per zone or lookups. (Wildcard: ? / DNSSEC: Yes)</p>
+<p><a href="https://www.cloudflare.com/">Cloudflare</a>: Unlimited lookups; 1000 (formerly 3500) records per zone; cannot find limit on number of zones. (Wildcard: Yes / DNSSEC: Yes) <a href="https://gist.github.com/benkulbertis/fff10759c2391b6618dd" rel="nofollow" target="_blank">Script at GitHub</a> for updating dynamic IP addresses in your Cloudflare zones.</p>
+<p><a href="https://www.cloudns.net/">ClouDNS</a>: 3 free zones; unlimited records and lookups; no control over TTL on free plans.</p>
+<p><a href="http://dns.he.net/">Hurricane Electric</a>: 50 free zones; cannot find limits on records per zone or lookups. (Wildcard: No / DNSSEC: No)</p>
+<p><a href="https://selectel.ru/en/">Selectel</a>: Unlimited zones; cannot find limits on records per zone or lookups. (Wildcard: Yes / DNSSEC: No)</p>
+<p><a href="https://veesp.com/">Veesp</a>: DNS hosting is available free if you are paying for other services there.</p>
+<p><a href="https://www.vultr.com/docs/introduction-to-vultr-dns">Vultr</a>: DNS hosting is available free even if you are not paying for other services there. They allow vanity name servers pointed at their own name servers.</p>
+<p><a href="https://connect.yandex.com/pdd/">Yandex</a>: 50 free zones; cannot find limits on records per zone or lookups. No CAA records. (Although this service is aimed at people using Yandex to host their email, Yandex support explicitly states that you are free to host DNS without also hosting your email.)</p>
+<h4>DNSSEC</h4>
+<p>Enabling DNSSEC:<br />
+Generate DNSSEC keys and DS records at your DNS host.<br />
+Add the DS records at your domain registrar.</p>
+<p>Disabling DNSSEC:<br />
+Remove the DS records at your domain registrar.<br />
+Wait 24 hours for most domains, but 48 hours for domains registered through EU.org. Do a “dig ds” check for the DS TTL on whatever domain from which you are removing DNSSEC.<br />
+Remove or disable DNSSEC at your DNS host.</p>
+<p>Examples of DS records:</p>
+<pre>
+debian.org. 10762 IN DS 6487 8 2 A9528F2409C5F6A95AE6E0F8A6C5A223AC4EFD54B45884CB855F044E 82F7F4C6  
+yandex.com. 9595 IN DS 31456 5 1 593F529E8942948DE9D6646AC5F9E2208F49D606
+</pre>
+<h4>DMARC Records</h4>
+<pre>
+_dmarc.domain.tld. IN TXT "v=DMARC1; p=none; rua=mailto:admin@domain.tld"
+</pre>
+<p>DMARC action to take if either SPF or DKIM fail:</p>
+<pre>
+p=none; - take no action
+p=quarantine; - mark message as spam
+p=reject; - reject message outright
+</pre>
+<p>To send DMARC reports to an address outside the email sending domain, create a TXT record in the DNS of the receiving domain:</p>
+<pre>
+email-sending-domain.tld._report._dmarc.receiving-domain.tld.  IN TXT "v=DMARC1"
+</pre>
+<p>Of course, you will still need to create the basic DMARC record in the DNS of the email sending domain:</p>
+<pre>
+_dmarc.email-sending-domain.tld. IN TXT "v=DMARC1; p=none; rua=mailto:admin@report-receiving-domain.tld"
+</pre>
+<h4 id="mx">MX Records</h4>
+<p>Fastmail</p>
+<pre>
+IN MX 10 in1-smtp.messagingengine.com.
+IN MX 20 in2-smtp.messagingengine.com.
+</pre>
+<p>Gandi</p>
+<pre>
+IN MX 10 spool.mail.gandi.net.
+IN MX 50 fb.mail.gandi.net.
+</pre>
+<p>Google</p>
+<pre>
+IN MX 1 aspmx.l.google.com.
+IN MX 5 alt1.aspmx.l.google.com.
+IN MX 5 alt2.aspmx.l.google.com.
+IN MX 10 alt3.aspmx.l.google.com.
+IN MX 10 alt4.aspmx.l.google.com.
+</pre>
+<p>MXroute (Replace SERVER with the name of the server on which your account is hosted, <em>e.g</em>., longhorn.)</p>
+<pre>
+IN MX 10 SERVER.mxrouting.net.
+IN MX 20 SERVER-relay.mxrouting.net.
+</pre>
+<p>Purelymail</p>
+<pre>
+IN MX 10 mailserver.purelymail.com.
+</pre>
+<p>Runbox</p>
+<pre>
+IN MX 10 mx.runbox.com.
+</pre>
+<p>Yandex</p>
+<pre>
+IN MX 10 mx.yandex.net.
+</pre>
+<p>Zoho</p>
+<pre>
+IN MX 10 mx.zoho.com.
+IN MX 20 mx2.zoho.com.
+IN MX 50 mx3.zoho.com.
+</pre>
+<h4>SPF Records</h4>
+<pre>
+v=spf1 -all # Do not accept mail from this domain
+v=spf1 include:server.com -all # Accept mail sent by server.com, but no one else
+v=spf1 a mx -all # Accept mail sent by the servers specified in the domain's A and MX records
+</pre>
+<p>Fastmail</p>
+<pre>
+include:spf.messagingengine.com
+</pre>
+<p>Gandi</p>
+<pre>
+include:_mailcust.gandi.net
+</pre>
+<p>Google</p>
+<pre>
+include:_spf.google.com
+</pre>
+<p>MXroute: Any one of the following should work. According to Jarland, the last involves the fewest DNS lookups.</p>
+<pre>
+include:mxlogin.com
+include:mxroute.com
+include:_s00002163.autospf.email
+</pre>
+<p>Purelymail</p>
+<pre>
+include:_spf.purelymail.com
+</pre>
+<p>Runbox</p>
+<pre>
+include:spf.runbox.com
+</pre>
+<p>Yandex</p>
+<pre>
+include:_spf.yandex.net
+</pre>
+<p>Zoho</p>
+<pre>
+include:zoho.com
+</pre>
+<p>Multiple “include” example:</p>
+<pre>
+domain.tld. IN TXT "v=spf1 include:_spf.yandex.net include:spf.messagingengine.com -all"
+</pre>
+<p>Multiple servers: Accept mail from the server specified in the mail server’s A record as well as from any server specified by the SPF record for Yandex.</p>
+<pre>
+domain.tld. IN TXT "v=spf1 a:mail-server.domain.tld include:_spf.yandex.net ~all"
+</pre>
+<h4>Miscellaneous</h4>
+<p>Disable IPv6 in Firefox by changing</p>
+<pre>
+network.dns.disableIPv6
+</pre>
+<p>from false to true in about:config.</p>
+<p>General note about serving web sites: If your server only has an IPv6 address, I have found two options for serving sites over IPv4:</p>
+<ul>
+<li>Use Cloudflare's DNS, and set Cloudflare to proxy.</li>
+<li>Add an A record for the <a href="http://v4-frontend.netiter.com/" rel="nofollow" target="_blank">Netiter proxy service</a>.</li>
+</ul>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+</body>
+
+</html>

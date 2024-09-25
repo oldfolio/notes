@@ -1,0 +1,13 @@
+# IP addresses added after installation
+
+# IPv6
+iface eth0 inet6 static
+address 2607:5300:201:3100::7857
+netmask 64
+gateway 2607:5300:0201:3100::1
+
+# Additional IPv4
+auto eth0:0
+iface eth0:0 inet static
+address 144.217.178.63
+netmask 255.255.255.255

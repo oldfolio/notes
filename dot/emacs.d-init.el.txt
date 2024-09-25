@@ -1,0 +1,144 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
+
+;; To avoid problems with the graphical gpg-agent, emacs has its own
+;; pinentry package that you can install from within emacs. Unfortunately,
+;; the Debian emacs package disables this functionality.
+;;(setenv "INSIDE_EMACS" (format "%s,comint" emacs-version))
+;;(pinentry-start)
+
+(add-to-list 'load-path "~/.emacs.d/el/")
+
+;; To prevent a startup error under MacOS 13 "Ventura"
+(add-to-list 'image-types 'svg)
+
+;; Simple font specification
+;(set-face-attribute 'default nil :font "Liberation Mono" )
+;; Complex font specification
+(set-face-attribute 'default nil :font "Monospace 17" )
+(if (window-system)
+  (set-frame-height (selected-frame) 32))
+
+; Don't show the * / or _ used to markup bold, italic or underline
+(setq org-hide-emphasis-markers t)
+
+;;;; START OF SECTION THAT SPECIFIES DIFFERENT FONTS FOR ORG-MODE & TEXT-MODE
+
+;; Use variable width font faces in org-mode buffer
+ (defun my-org-mode-font ()
+   "Set font to a variable width (proportional) fonts in current buffer"
+   (interactive)
+   (setq buffer-face-mode-face '(:family "Times New Roman"))
+   (set-face-attribute 'default nil :font "Times New Roman 20")
+   (buffer-face-mode))
+
+;; Use monospaced font faces in text-mode buffer
+ (defun my-text-mode-font ()
+   "Sets a fixed width (monospace) font in current buffer"
+   (interactive)
+   (setq buffer-face-mode-face '(:family "Menlo"))
+   (set-face-attribute 'default nil :font "Menlo 20")
+   (buffer-face-mode))
+
+;; Set default font faces for org and text modes
+ (add-hook 'org-mode-hook 'my-org-mode-font)
+ (add-hook 'text-mode-hook 'my-text-mode-font)
+
+;;;; END OF SECTION THAT SPECIFIES DIFFERENT FONTS FOR ORG-MODE & TEXT-MODE
+
+;; Sometimes, on a Mac, to get spellchecking working, you need to install
+;; aspell ("brew install aspell"), then add the path to aspell here:
+(setq ispell-program-name "/usr/local/bin/aspell")
+
+;;; Hooks
+(add-hook 'text-mode-hook 'typopunct-mode)
+(add-hook 'text-mode-hook 'ruler-mode)
+;(add-hook 'text-mode-hook 'refill-mode)
+;(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+(add-hook 'org-mode-hook 'turn-on-visual-line-mode)
+
+;;; Set default fill column (i.e. text-width) to 78
+;; (setq-default fill-column 72)
+(setq-default fill-column 78)
+
+;;; Set default major mode to text mode
+(setq-default major-mode 'text-mode)
+
+;;; Don't create backup files or autosave
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+
+;;; Set dired listing mode to human readable
+(setq dired-listing-switches "-alh")
+
+;;; Display column number
+(column-number-mode 1)
+
+;;;; GNUPG ALTERNATIVE SETUPS
+
+;;; UNDER MACOS YOU MAY NEED TO SPECIFY WHERE THE GPG BINARY IS:
+;(custom-set-variables '(epg-gpg-program  "/usr/local/bin/gpg"))
+
+;;; Standard configuration for enabling GPG encryption/decryption
+;(require 'epa-file)
+;(epa-file-enable)
+;(setq epa-file-name-regexp "\\.\\(gpg\\|asc\\)$")
+;(epa-file-name-regexp-update)
+
+;;; The standard GPG configuration re-encrypts ascii files as binary.
+;;; To overcome this problem the following configuration was suggested
+;;; at StackExchange https://unix.stackexchange.com/questions/55354/how-to-use-emacs-to-recognize-and-automatically-open-gpg-encrypted-file-in-ascii
+(setq epa-pinentry-mode 'loopback)
+(epa-file-enable)
+
+(setq epa-file-name-regexp "\\.\\(gpg\\|\\asc\\)\\(~\\|\\.~[0-9]+~\\)?\\'")
+(epa-file-name-regexp-update)
+
+;; Minor mode for ASCII-armored gpg-encrypted files
+(define-minor-mode auto-encryption-armored-mode
+  "Save files in encrypted, ASCII-armored format"
+  ;; The initial value.
+  nil
+  ;; The indicator for the mode line.
+  " Encrypted,Armored"
+  ;; The minor mode bindings.
+  nil
+  (if (symbol-value auto-encryption-armored-mode)
+      (set (make-local-variable 'epa-armor) t)
+    (kill-local-variable 'epa-armor))
+  )
+
+(add-to-list 'auto-mode-alist '("\\.asc$" . auto-encryption-armored-mode))
+
+;;; End of complex GPG configuration for ASCII armored files. 
+
+;;; Add typographical marks
+(require 'typopunct)
+(typopunct-change-language 'english t)
+
+(require 'gopher)
+
+;; Calendar stuff
+(setq calendar-latitude 38.05)
+(setq calendar-longitude -84.5)
+(setq calendar-location-name "Lexington, Ky.")
+(setq diary-file "/home/mm/.emacs.d/diary.gz")
+
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages (quote (pinentry chess))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

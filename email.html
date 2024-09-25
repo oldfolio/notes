@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: Email</title>
+</head>
+
+<body>
+<h1>Miscellaneous Email Notes</h1>
+<p>NOTE: Be sure to see also the DNS notes that are relevant
+to setting up email hosting (MX, SPF, etc.).</p>
+<h2>Alpine</h2>
+<pre>
+Search all messages in a folder:
+
+; t a [search string]
+; = select
+t = text
+a = all fields
+
+Command line options:
+
+alpine -p [/path/to/alternate-pinerc] -passfile [/path/to/password-file]
+
+When creating a password file, Alpine no longer behaves the way it did
+in the free and easy old days when you could create a passfile with
+simply
+
+touch password-file
+
+Now, after creating a new empty file (with "touch" as above), you need
+to open the file with an editor and insert a line return. After saving
+the passfile with the line return in it, Alpine should then prompt you
+to create a master password to encrypt the passfile the next time
+Alpine needs to access the passfile.
+
+Common server strings:
+
+{smtp.fastmail.com:465/ssl/user=user@fastmail.com/novalidate-cert}
+{imap.fastmail.com:993/ssl/user=user@fastmail.com/novalidate-cert}
+{imap.gmail.com:993/ssl/user=user@gmail.com/novalidate-cert}[Gmail]/All Mail
+
+If you wish to start Alpine with a remote pinerc, add the following
+argument at the command line:
+
+alpine -p {imap.gmail.com:993/ssl/user=user@gmail.com/novalidate-cert}pinerc-sdf-pine
+
+Some settings you might want to tweak:
+
+deadletter
+enable alternate editor command
+  [allows you to use ^_ to invoke an editor other than alpine's default]
+
+sigdashes
+
+header in reply
+text in reply
+
+disable-sender / do not generate sender header
+mark fcc seen
+blank fcc
+blank subject
+dot-folders / hidden folders
+convert dates to localtime
+delete skips deleted (I'm less likely to mistakenly expunge a deleted message if this is unchecked.)
+x-x-sender
+
+index-format STATUS MSGNO DATE FROMORTO KSIZE SUBJECT
+     [The default when this field is undefined is same as above
+     except that the default uses SIZE instead of KSIZE.]
+enable aggregate
+enable flag
+enable full header command
+expose hidden config
+sort-key = Date or Reverse Date
+
+Default Composer Headers
+	From:
+	To:
+	Cc:
+	Fcc:
+	Subject:
+	Attchmnt:
+
+customized-hdrs / Customized Headers = From: Full Name <user@domain.com>
+
+editor = emacs [or vim]
+  [The editor invoked by the ^_ (alternate editor command)]
+
+DELETE FILTER
+
+When a message is expunged, this filter moves it to a designated
+folder (i.e. Trash). The message is only fully removed when it is
+expunged from the designated folder. You probably do not want to
+use this filter with Gmail. If you use Gmail, then moving a message
+to the [Gmail]/Trash folder will remove it from all other locations,
+and when expunged from [Gmail]/Trash the message is gone forever.
+
+S(etup) -- R(ules) -- F(ilters)
+
+Nickname: Move Deleted to Trash
+Current Folder Type = Email
+Message is Deleted? = Yes
+Filter Action = Move (then select folder)
+
+For IMAP Collections:	
+    separate-folder-and-directory-entries
+    quell-empty-directories
+    You might also need: enable-lame-list-mode / deficient imap servers
+
+Odd characters show up in the body of messages:
+
+This can be caused by a character-encoding mismatch between your terminal
+and alpine. Make sure both are set to utf-8.
+</pre>
+<h2>Mutt</h2>
+<p>In mutt, messages are "tagged" rather than "selected". To tag a group
+of messages, type</p>
+<pre>
+T
+</pre>
+<p>To select all messages, type</p>
+<pre>
+~A
+</pre>
+<p>To select messages 1-100, type</p>
+<pre>
+~m 1-100
+</pre>
+<p>Apply the next given command to all tagged messages</p>
+<pre>
+;
+</pre>
+<p>The subsequent command to move (i.e. save) messages is</p>
+<pre>
+s
+</pre>
+<p>You can then select the folder to which the messages will
+be moved. The original messages will be deleted when you
+exit mutt.</p>
+<p>To save a message from a local folder to an IMAP mailbox:</p>
+<pre>
+s - to save
+backspace to colon
+enter imaps://username@server/Folder
+</pre>
+<p>To save a message from an IMAP mailbox to a local folder:</p>
+<pre>
+s - to save
+backspace to colon
+enter ~/Mail/Folder
+</pre>
+<p>A Sample ~/.muttrc File</p>
+<pre>
+set editor="/usr/local/bin/vim"
+set from="username@domain"
+set use_from=yes
+set realname="FirstName LastName"
+set record="/home/user/Mail/Sent"
+set postponed="/home/user/Mail/Drafts"
+
+## To add an external IMAP account ##
+set imap_user=imapusername
+set imap_pass=imappassword
+account-hook imaps://imapserver 'set imap_user=imapusername'
+mailboxes imaps://imapusername@imapserver/INBOX
+folder-hook imaps://imapusername@imapserver 'set folder=imaps://imapserver'
+
+## To send through an external SMTP server ##
+set smtp_pass smtppassword
+set smtp_url=smtps://smtpusername@smtpserver:465
+set ssl_force_tls=yes
+</pre>
+<h2>Ports</h2>
+<pre>
+<ul>
+<li>IMAP: 993</li>
+<li>POP3: 995</li>
+<li>SMTP: 465</li>
+</ul>
+</pre>
+<h2>Thunderbird</h2>
+<h3>Fonts</h3>
+<p>Use default styles/faces.</p>
+<pre>
+Proportional Size: 20
+Monospace Size: 18
+
+Minimum font size: 18
+
+Uncheck:
+  Allow messages to use other fonts
+  Use fixed width font for plain text messages
+</pre>
+<h3>Calendar</h3>
+<p>Use a synchronized local file as a pseudo-network calendar:</p>
+<pre>
+On the network
+icalendar
+file:///home/user/Documents/sync-calendar.ics (Linux)
+file:///C:/Users/username/Documents/sync-calendar.ics (Windows)
+</pre>
+<h3>Testing</h3>
+<p>I sent messages to my Purelymail email account using two different SMTP services. Here is how they compared:</p>
+<table border='1' cellpadding='3' ><tr ><th >&nbsp;</th><th  align='center'>Sendgrid</th><th  align='center'>SMTP2Go</th></tr>
+<tr ><td  align='center'>SPAM</td><td  align='center'>-0.81</td><td  align='center'>0.55</td></tr>
+<tr ><td  align='center'>SIZE</td><td  align='center'>3.1 K</td><td  align='center'>3.2 K</td></tr>
+<tr ><td  align='center'>TIME</td><td  align='center'>1 sec.</td><td  align='center'>3 sec.</td></tr>
+</table>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+
+</body>
+
+</html>

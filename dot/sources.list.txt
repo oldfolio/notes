@@ -1,0 +1,3 @@
+deb https://cloudflaremirrors.com/debian buster main
+
+deb https://cloudflaremirrors.com/debian buster-updates main

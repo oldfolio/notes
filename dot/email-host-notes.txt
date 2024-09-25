@@ -1,0 +1,32 @@
+
+EMAIL HOST NOTES
+
+FASTMAIL: From a technical perspective you cannot get better
+than Fastmail. When considered simply from that technical
+perspective, nobody -- not even Google -- does email better.
+Part of that technical expertise, though, involves adding
+more headers than any other provider, bar none. Message size
+is larger with Fastmail than with anyone else. The other
+trouble is that their customer service is a bit hit-and-miss.
+Some people report absolutely wonderful customer service
+experiences. Others describe absolutely inexcusable treatment.
+
+RUNBOX: From a customer service perspective you cannot get
+better than Runbox. In that regard, they are the best in the
+email provider business. For that reason alone I would love
+to be able to use Runbox as my primary email provider. The
+trouble I have is that their web interfaces are more frustrating
+to use than any others that I have tried. With both versions
+6 and 7 of the interface I have encountered situations where
+the folder contents reported by the web interface were very
+different from the folder contents reported by IMAP clients.
+Thus, I cannot bring myself to rely on Runbox as a primary
+provider. It is also worth noting that their IMAP server
+suffers more downtime than any other provider's.
+
+YANDEX: It's free. It's easy to use. But, Yandex silently
+discards legitimate messages. They don't even go to the
+spam folder. Yandex is almost as overly aggressive as
+Microsoft when it comes to screening incoming messages. I
+cannot use an email service where I am constantly worried
+that I am missing important messages.

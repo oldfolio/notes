@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: CLI</title>
+</head>
+
+<body>
+<h1>Command Line Notes</h1>
+<h3>7-ZIP</h3>
+<pre>
+7za a -mhe -p archive-name.7z original-file
+</pre>
+<p>a = add to archive<br />
+-mhe = encrypt headers as well as data<br />
+-p = prompt for password</p>
+<p>You can also add the switch</p>
+<pre>
+-mx0
+</pre>
+<p>if you do not wish to do any compressing. For maximum compression, use:</p>
+<pre>
+7za a -mx9 -mhe -p archive-name.7z original-file
+</pre>
+<h3>APT</h3>
+<pre>
+apt-get --no-install-recommends install package-name
+</pre>
+<p>To upgrade just a single package instead of all available upgrades:</p>
+<pre>
+apt-get install --only-upgrade package-name
+</pre>
+<h3>BLKDISCARD</h3>
+<p>Discards blocks on a file system, leaving the data that was on the device unrecoverable by software means. This functions as a quick and dirty way to wipe all the data on a block device. Even though the data is not actually overwritten, software analysis of the disk will see only zeroes.</p>
+<h3>CD</h3>
+<p>To return to the directory that you just left:</p>
+<pre>
+cd -
+</pre>
+<h3>CHMOD</h3>
+<p>Recursively remove executable bit from files, while omitting directories:</p>
+<pre>
+chmod -R -x+X target/
+</pre>
+<p>The capital "X" sets the executable bit on directories only.</p>
+<h3>DATE</h3>
+<p>FreeBSD: Set the date to 5:05 pm, January 21, 2018</p>
+<pre>
+date 201801211705
+     yyyymmddhhmm
+</pre>
+<p>If you only need to change the hours and minutes</p>
+<pre>
+date 1705
+</pre>
+<p>will change the time to 5:05 pm and leave the date unchanged.</p>
+<p>TOTP codes regenerate every thirty seconds, starting at 0 and 30. To display the current second:</p>
+<pre>
+date +%S
+</pre>
+<p>You could also run a simple script that returns the number of seconds until the TOTP code is regenerated:</p>
+<pre>
+#!/bin/sh
+SEC=$( date +%S )
+TL1=$((30-$SEC))
+TL2=$((60-$SEC))
+
+if [ $TL2 -ge 30 ]; then
+ expr $TL1
+ else
+ expr $TL2
+ fi
+</pre>
+<p>If you want to get even fancier, <a href="dot/totp-tl.sh.txt">the following script</a> will print the seconds in <span style="color:red">red</span> if you have fewer than ten seconds left before the TOTP code regenerates:</p>
+<pre>
+#!/bin/sh
+SEC=$( date +%S )
+TL1=$((30-$SEC))
+TL2=$((60-$SEC))
+
+if [ $TL2 -ge 30 ]; then
+ TL=$TL1
+ else
+ TL=$TL2
+ fi
+
+RED="\033[1;31m"
+NOCOLOR="\033[0m"
+
+if [ $TL -ge 10 ]; then
+ echo $TL
+ else
+ echo "${RED}$TL${NOCOLOR}"
+ fi
+</pre>
+<h3>DD</h3>
+<p>Overwrite with zeroes a 133 byte file:</p>
+<pre>
+dd if=/dev/zero of=filename count=1 bs=133
+</pre>
+<p>Overwrite with zeroes a 1 MB byte file:</p>
+<pre>
+dd if=/dev/zero of=storage-bin count=1K bs=1024
+</pre>
+<p>Overwrite with zeroes a 1 GB byte file:</p>
+<pre>
+dd status=progress if=/dev/zero of=storage-bin count=1024K bs=1024
+dd status=progress if=/dev/zero of=storage-bin count=1M bs=1024
+</pre>
+<p>On my home system, /dev/zero can be used to generate a 10G file in about 45 seconds. By contrast, /dev/urandom will take about three minutes. Do not even bother with /dev/random.</p>
+<h4>Write an ISO file to a USB stick:</h4>
+<pre>
+dd if=/path/to/iso-file of=/dev/sdX bs=1M status=progress
+</pre>
+<h4>Speeding Things Up</h4>
+<p>To create a 20G file in almost no time, use dd's "seek" argument:</p>
+<pre>
+dd if=/dev/zero of=filename bs=1G seek=20 count=0
+</pre>
+<h3>DIG</h3>
+<p>Check the mx record for yandex.com at the name server dns1.yandex.net:</p>
+<pre>
+dig @dns1.yandex.net yandex.com mx
+</pre>
+<p>Check all record types in a zone:</p>
+<pre>
+dig yandex.com any
+</pre>
+<p>Note that an increasing number of authoritative DNS servers reject requests for type <strong>any</strong>. See bullet point 10 <a href="https://www.rootusers.com/12-dig-command-examples-to-query-dns-in-linux/" rel="nofollow" target="_blank">here</a>.</p>
+<p>For DNSSEC, to see if a DNSKEY is set at your domain's registry:</p>
+<pre>
+dig domain.tld dnskey
+</pre>
+<p>To see if your DNS host is validating the DNSKEY:</p>
+<pre>
+dig +dnssec domain.tld dnskey
+</pre>
+<p>and you should an RRSIG reply indicating that your DNS host has signed the domain.</p>
+<p>On Debian-based systems <strong>dig</strong> is supplied by the package <strong>dnsutils</strong>, on FreeBSD by <strong>bind-tools</strong>.</p>
+<h3>DMIDECODE</h3>
+<p>Displays hardware information. Must be run as root. See <a href="https://www.howtoforge.com/dmidecode-finding-out-hardware-details-without-opening-the-computer-case">this guide</a>.</p>
+<p>To display memory information:</p>
+<pre>
+dmidecode -t memory
+</pre>
+<h3>DPKG</h3>
+<p>List installed packages:</p>
+<pre>
+dpkg --get-selections
+</pre>
+<p>Show the status of package, PACKAGE:</p>
+<pre>
+dpkg-query --status PACKAGE
+</pre>
+<h3>DU</h3>
+<pre>
+du -h --max-depth=1
+</pre>
+<h3><a href="http://duplicity.nongnu.org/" rel="nofollow" target="_blank">DUPLICITY</a></h3>
+<p>Backup files in directory “source” to a remote server. The first time duplicity runs it will do a full backup. Subsequently, it will do an incremental backup of changes.</p>
+<pre>
+duplicity --encrypt-key gpg-key /home/user/source sftp://host//home/user/target
+
+duplicity --encrypt-key gpg-key /home/user/source file:///home/user/local-target
+
+duplicity restore sftp://host//home/user/backup /home/user/local-restore-directory
+</pre>
+<p>On incremental backups, some versions of duplicity will return the following error message related to GnuPG:</p>
+<pre>
+Error processing remote manifest
+</pre>
+<p>This is a known and benign error message that does not indicate any failures in the backup.</p>
+<h3>ELINKS</h3>
+<p>If you enable one of the color modes, then [shift]-5 will cycle through the color schemes for that mode.</p>
+<p>You can toggle the numbering of hyperlinks with the period "."</p>
+<h3>EMACS</h3>
+<p>My Emacs notes have <a href="emacs.html">their own page</a>.</p>
+<h3>FALLOCATE</h3>
+<p>fallocate: Preallocate or deallocate space to a file</p>
+<p>This command can be used to create large files faster than dd. To create an empty 1 MB file:</p>
+<pre>
+fallocate -l 1M filename
+</pre>
+<p>The -l switch specifies the size. K=kilobytes. M=Megabytes. G=Gigabytes. The default is bytes. More specifically, M = 1024*1024 bytes but MB = 1000*1000.</p>
+<h3>FD / FDFIND</h3>
+<p>A much more user-friendly version of the traditional "find" command. Debian has renamed the upstream binary from "fd" to "fdfind" but this change is not mentioned in the Debian man page, which is still located at "man fd".</p>
+<h3>GIT</h3>
+<p>Create a local directory for git repositories. Then, in that directory, retrieve the remote repository that you wish to work on locally:</p>
+<pre>
+git clone git@github.com:oldfolio/notes3e.git
+</pre>
+<p>Note that the above command presupposes that you have added an SSH key to your GitHub acount. Over time, your local folder can grow quite large with the record of changes that git keeps in the .git directory. One solution is to run the above command in a new folder and use the new smaller folder as your working directory.</p>
+<p>You may also want to set the following in your global configuration:</p>
+<pre>
+git config --global pull.rebase false
+git config --global core.excludesFile ~/.gitignore
+</pre>
+<p>A good initial ~/.gitignore file might include:</p>
+<pre>
+.DS_Store
+</pre>
+<p>Edit locally whatever files you wish to change. To update the remote repository:</p>
+<pre>
+git diff (optional, to see changes)
+git add -u # This adds all files that have been updated.
+git add .  # This adds all files in current directory, i.e.
+           # untracked files will become tracked files.
+git commit (or git commit -am "Update message")
+git push
+</pre>
+<p>Add a new file:</p>
+<pre>
+git add FILENAME
+</pre>
+<p>To clean up your clone so that it matches the origin, you can run:</p>
+<pre>
+git fetch origin
+</pre>
+<p>Completely discard local changes and set your clone to match the origin master:</p>
+<pre>
+git fetch
+git reset --hard HEAD
+git merge origin/master
+</pre>
+<p>Resetting your clone makes it match the origin, discarding your local differences.</p>
+<p>Keep local changes, but update your repo before pushing them:</p>
+<pre>
+git fetch
+git stash
+git merge origin/master
+git stash pop
+</pre>
+<p>Stashing creates a commit that is not visible to the branch's tracking. You then merge the origin with your local clone. Finally, you retrieve the stashed commit, discarding the stash in the process.</p>
+<h5>Creating a New Repository</h5>
+<p>If you create a new repository <strong>locally</strong> and want to push it to Github, you would:</p>
+<pre>
+$ cd LOCAL_REPO_DIRECTORY
+$ git remote add origin git@github.com:oldfolio/REPO_NAME.git
+$ git push origin master
+</pre>
+<p>The above steps do the reverse of what cloning a Github repository to your local machine does (as described in the cloning section above).</p>
+<h5>Creating a New Repository without a Remote</h5>
+<p>You do not need remotes to use git to track changes. You can use git to manage a directory without setting up a remote if you do not need the files synchronized to other devices. The git workflow is the same, except that there is no pushing or pulling. If you want to set up a remote later, you can do that. Simply create an empty bare repo, go back to the original directory, and run:</p>
+<pre>
+git remote add origin URL-TO-BARE-REPO
+</pre>
+<p>Then, still in the original directory, run:</p>
+<pre>
+git push --set-upstream origin master
+</pre>
+<h5>Github Sites</h5>
+<p>To host a static site at Github pages, create a repository for the site. In the root directory for the site, place a text file named CNAME. The content of the CNAME file should simply be the domain name you wish to use for the site, e.g. notes.oldfolio.org. Then create a CNAME record at your domain’s DNS host that points to USERNAME.github.io:</p>
+<pre>
+notes 300 IN CNAME oldfolio.github.io.
+</pre>
+<p>You can then check the Enforce HTTPS option in your repository’s settings.</p>
+<p>To check the status of your repository:</p>
+<pre>
+git status
+</pre>
+<p>When you are away from your local folder you can still edit your site by logging into Github and editing files there. You would just need to remember to pull those changes into your local folder with</p>
+<pre>
+git pull [origin master]
+</pre>
+<h5>Hosting Your Own Git Repository</h5>
+<p>Create the host repository:</p>
+<pre>
+git init --bare repository-name.git
+</pre>
+<p>Then, you will need to clone that repository on whatever machines
+you wish to use when working in that repository:</p>
+<pre>
+git clone username@owl:git/repository-name.git
+</pre>
+<p>where "owl" is the ~/.ssh/config "Host" and "git/repository-name.git"
+is the path to the main repository hosting home, relative to the git-hosting
+user's home directory.</p>
+<p>To view a summary of changes to a file:</p>
+<pre>
+git log relative-path-to/file
+</pre>
+<p>To view the most recent changes to a file:</p>
+<pre>
+git show --pretty=medium relative-path-to/file
+</pre>
+<p><strong>Unrelated Histories</strong></p>
+<p>If you commit two unrelated files in different clones, git will accept the first one you push but reject the second "<em>refusing to merge unrelated histories</em>". You can get around this by running</p>
+<pre>
+git merge --allow-unrelated-histories
+</pre>
+<p>in the second clone. You can then <em>push</em> the second file. Of course, you also then need to <em>pull</em> that change back in the first clone.</p>
+<p><strong>To edit most recent old commit message</strong>:</p>
+<pre>
+git rebase -i HEAD~1
+</pre>
+<p>This will bring up an editor window. The top line will contain an instruction to git. The default is <strong>pick</strong>. You will likely want to change that to <strong>r</strong> or <strong>reword</strong>. Once the proper command to git is specified, save the buffer and exit the editor. This will bring up another editor window allowing you to edit the commit message. After you have finished editing the commit message save it. This will have changed the git message locally. You still need to push the git message to the master. Because the associated change has already been pushed you will need to <em>force</em> the push:</p>
+<pre>
+git push --force
+</pre>
+<p><strong>To restore an old version of a file</strong>:</p>
+<pre>
+git checkout commit-id-number relative-path-to/file
+git commit -am "commit message"
+git push
+</pre>
+<p>The checkout command first reads the file into the index, then copies it into the working tree, so there's no need to use <strong>git add</strong> to add it to the index in preparation for committing.</p>
+<p>For file conflict resolution, see the <a href="https://git-scm.com/book/en/v2/Git-Tools-Advanced-Merging">Pro Git Book</a>.</p>
+<p>If you have not yet <em>added</em> a file, you can simply delete. Until you <em>add</em> a file git is not paying attention to that file. Once you do add a file, the file is <em>staged</em> but not <em>committed</em>. You can unstage a file with:</p>
+<pre>
+git restore --staged filename
+</pre>
+<p>At that point, you can simply delete the file if you no longer want it. No harm, no foul.</p>
+<p><strong>Searching a Git Repository</strong></p>
+<pre>
+git grep -n search-term
+</pre>
+<p>will return every instance of search-term in the form of:</p>
+<pre>
+file-name:line-number:The text of the line in which <strong>search-term</strong> appears.
+</pre>
+<p><strong>If you inadvertently delete your git origin repository</strong>, you can
+re-create it from one of your clones.</p>
+<p>Create a new bare repository in the directory you use for origin
+repositories. Then, enter the directory in which the clone lives
+and set the URL for its origin repository to the new repo you
+just created:</p>
+<pre>
+$ git remote set-url origin mm@hp1:git/new-repo
+</pre>
+<p>Then push your clone to the new origin:</p>
+<pre>
+$ git push
+</pre>
+<p><strong>List remotes:</strong></p>
+<pre>
+$ git remote -v
+</pre>
+<h5>Reducing Repository Size</h5>
+<p>You can adjust how much git compresses its packed files on a numerical scale from -1 to 9, with 9 being the greatest amount of compression. The default is -1. To adjust the compression level for a specific repository, run the following command from within the repository:</p>
+<pre>
+git config core.compression 4
+</pre>
+<p>To set a compression level globally, run:</p>
+<pre>
+git config --global core.compression 4
+</pre>
+<p>This last command will add a</p>
+<pre>
+compression = 4
+</pre>
+<p>line to the [core] section of your ~/.gitconfig file.</p>
+<p>After adjusting the compression level, you should repack the repository:</p>
+<pre>
+git repack -F -d
+</pre>
+<p>The <strong>-F</strong> switch tells git to apply the new compression level to old files and not just to ones added after the compression level was changed. The <strong>-d</strong> switch tells git to delete any files that are no longer needed once the repacking has finished.</p>
+
+<h3>GNUPG</h3>
+<p>Generate a new elliptical curve key pair (ECC) instead of an older RSA key pair:</p>
+<pre>
+gpg --expert --pinentry-mode=loopback --full-gen-key
+</pre>
+<p>In the above example <strong>--pinentry-mode=loopback</strong> is used because I am usually working in a console environment. If you are working in a graphical environment, you probably do not need it.</p>
+<p>Simple symmetric file encryption:</p>
+<pre>
+gpg -c --cipher-algo blowfish filename.txt
+</pre>
+<p>Encrypt to a specific user/recipient:</p>
+<pre>
+gpg -e -r USER file.txt
+</pre>
+<p>Create a detached, ascii-enarmored signature specifying which key to use:</p>
+<pre>
+gpg -u key-to-use -a --output file.sig --detach-sig file.txt
+</pre>
+<p>Create a non-detached, ascii-enarmored signature specifying which key to use:</p>
+<pre>
+gpg -u key-to-use --clearsign file.txt
+</pre>
+<p>Verify detached signature:</p>
+<pre>
+gpg --verify signature.sig signed-file.txt
+</pre>
+<p>Export public key:</p>
+<pre>
+gpg -a --export {key-identifier} > public-key.asc
+</pre>
+<p>Export secret/private key:</p>
+<pre>
+gpg -a --export-secret-keys {key-identifier}  > secret-key.asc
+</pre>
+<p>If you should ever need to edit your ~/.gnupg/<a href="dot/gpg-agent.conf.txt">gpg-agent.conf</a> file, you will need to reload the gpg-agent once you are finished editing.</p>
+<pre>
+$ gpg-connect-agent reloadagent /bye
+</pre>
+<p>Use extreme caution if you change the gpg-agent to pinentry-curses. Doing so breaks the graphical version of Emacs, and I have not yet found a work-around. If you will be working remotely with GnuPG encrypted files, you may need to set the agent to pinentry-curses. (See the dot file above.) Otherwise, the gpg-agent will expect a graphical environment -- and fail when one is not present.</p>
+<p><strong>UPDATE:</strong> You can use <strong>GPG2 in NON-GRAPHICAL ENVIRONMENTS</strong> without the annoyances of the graphical gpg-agent. You need to edit two files:</p>
+<pre>
+~/.gnupg/gpg-agent.conf
+~/.gnupg/gpg.conf
+</pre>
+<p>Add the line</p>
+<pre>
+allow-loopback-pinentry
+</pre>
+<p>to ~/.gnupg/gpg-agent.conf and add the line</p>
+<pre>
+pinentry-mode loopback
+</pre>
+<p>to ~/.gnupg/gpg.conf.</p>
+<p>Another way to implement <strong>GPG2 in NON-GRAPHICAL ENVIRONMENTS</strong>, specifically for use with Emacs, is to add the following lines to your ~/.gnupg/gpg-agent.conf file:</p>
+<pre>
+allow-emacs-pinentry
+allow-loopback-pinentry
+</pre>
+<p>Remember to run:</p>
+<pre>
+$ gpg-connect-agent reloadagent /bye
+</pre>
+<p>Then, add the following line to your ~/.emacs.d/init.el file, preferably near the other "epa" lines in order to keep all the gnupg config lines together::</p>
+<pre>
+(setq epa-pinentry-mode 'loopback)
+</pre>
+<h3>GREP</h3>
+<p>To search for all files in a directory structure containing a string of text either of the following strings will work:</p>
+<pre>
+$ grep -rni ./ -e 'text to search for'
+$ grep -rni "text to search for" ./*
+
+-r = recursive (-R in OpenBSD)
+-n = list line number where text is found
+-i = case insensitive search
+</pre>
+<p>Note that this searches file contents but <em>not</em> file names. You can add the <strong>-w</strong> switch if you want the string of text treated as a whole word. For instance, a search with -w for 'text' will not return instances of 'text<strong>s</strong>'. A search without the -w switch <em>will</em> return 'texts', 'textual', etc.</p>
+<p>OpenBSD's version of grep does not support the <strong>--color</strong> switch. In fact, OpenBSD's version of grep does not support any colorized option. Also, the recursive switch is capital R in OpenBSD, not lower case r as it is in Linux.</p>
+<h3>HTML ESCAPE SEQUENCES</h3>
+<pre>
+&amp;amp; will display &amp;
+&amp;lt; will display &lt;
+&amp;gt; will display &gt;
+</pre>
+<p>You might also find this useful;</p>
+<pre>
+&lt;p&gt;&lt;a href=""&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href="" rel="nofollow" target="_blank"&gt;&lt;/a&gt;&lt;/p&gt;
+</pre>
+<p>Be sure not to overlook the &lt;q&gt; &lt;/q&gt; tag, which adds curly quotation marks as demonstrated <q>here</q>.</p>
+<h3>JOURNALCTL</h3>
+<p>If the systemd journal is growing too large, you can reduce the space used in the following way:</p>
+<pre>
+journalctl --rotate
+journalctl --vacuum-size=100M
+</pre>
+<p>The <strong>rotate</strong> flag archives all the currently active journal files, and the <strong>vacuum-size</strong> flag removes all but the most recent 100M of archived journal files.</p>
+<h3>LN</h3>
+<pre>
+ln -s target-file link-name
+</pre>
+<h3>LOSETUP</h3>
+<pre>
+# losetup -a # List the status of all loop devices
+# losetup /dev/loop0 filename # Associate loop device 0 with file filename
+# losetup -d /dev/loop0 # Detach loop device
+</pre>
+<h3>NAMEBENCH</h3>
+<p>Send 128 queries to only the nameservers specified:</p>
+<pre>
+namebench -q 128 -O 208.67.222.222, 1.1.1.1, 8.8.8.8
+</pre>
+<h3>NETHACK</h3>
+<p>Some nethack commands:</p>
+<pre>
+@ = toggle autopickup
+d = drop
+i = open inventory
+r = read (as in read a spellbook)
+t = throw (as in throw a dagger)
+w = wield weapon
+f = fire arrows in quiver using wielded bow
+Q = place arrows in quiver
+S = save your game and exit
+P = put on (as in put on a ring)
+R = remove (as in remove a ring)
+W = wear armor or shield
+T = take off armor or shield
+Z = cast a spell
+^d = bash (as in bash a door)
+#chat = talk to another character
+#loot = open a container
+#force = attempt to open a locked container
+#untrap = rescue pet from pit
+</pre>
+<p>Possible ~/.nethackrc</p>
+<pre>
+OPTIONS=color,time,hilite_pet,menucolors,!autopickup,role=valkyrie,race=human
+#OPTIONS=color,time,role=wizard,race=elf,gender=female
+</pre>
+<h3>NETSTAT</h3>
+<p>To see which TCP ports are open on your server:</p>
+<pre>
+netstat -ant
+</pre>
+<p>See, also, <strong>ss</strong> below.</p>
+<h3>NEXTCLOUD OCC</h3>
+<p>Nextcloud's command line <strong>occ</strong> script is found <strong>in Nextcloud's root directory</strong>. <strong>It needs to be run as the web server user</strong>. To get a list of basic command options, run:</p>
+<pre>
+sudo -u www-data php --define apc.enable_cli=1 occ
+</pre>
+<p>Because Nextcloud does not monitor changes to the underlying file system, if you copy files directly to a users "files" directory, Nextcloud will not recognize those files as being present. To get Nextcloud to recognize the copied files, you need to use the occ tool to re-scan the user's files:</p>
+<pre>
+sudo -u www-data php --define apc.enable_cli=1 occ files:scan USERNAME
+</pre>
+<h3>OPENSSL</h3>
+<p>You can use openssl for simple file encryption:</p>
+<pre>
+openssl enc -blowfish -a -iter 12 -in filename.txt -out filename.enc
+</pre>
+<p>To decrypt the output file from the above example:</p>
+<pre>
+openssl enc -d -blowfish -a -iter 12 -in filename.enc -out filename.txt
+</pre>
+<p>For decryption, notice the addition of the -d switch and the reversal of the input and output filenames. Also, notice that <strong>all</strong> of the other options are included. Omitting any of those options will yield a failure to decrypt.</p>
+<p>Some ciphers that you can use <a href="dot/openssl-ciphers.txt">here</a>.</p>
+<h3>PASS: UNIX PASSWORD-STORE</h3>
+<p>Install under Debian:</p>
+<pre>
+apt-get install pass-extension-otp
+</pre>
+<p>The above command will install the OTP extension as well as the base password-store utility.</p>
+<p>Specify password-store directory in ~/.profile or ~/.mkshrc, etc.</p>
+<pre>
+PASSWORD_STORE_DIR=/path/to/directory
+export PASSWORD_STORE_DIR
+</pre>
+<p>Create a new password-store database:</p>
+<pre>
+pass init [email-address-associated-with-GPG-key]
+</pre>
+<p>Enter a new account in the password-store:</p>
+<pre>
+pass insert -m Account-Name [or]
+pass insert -m Folder/Account-Name
+</pre>
+<p>Edit the information for an account that already exists in the password-store:</p>
+<pre>
+pass edit Account-Name
+</pre>
+<p>Show account information:</p>
+<pre>
+pass show Account-Name
+</pre>
+<p>Add a TOTP secret key to an account:</p>
+<pre>
+pass otp append Account-Name
+</pre>
+<p>When prompted enter a key URI of the form:</p>
+<pre>
+otpauth://totp/acct-name?secret=SECRET-KEY
+</pre>
+<p>You could also just add the above URI string to the password-store entry using the <strong>pass edit Account-Name</strong> command.</p>
+<p>Print the current TOTP code:</p>
+<pre>
+pass otp code Account-Name
+</pre>
+<p>Remove an entry from the password-store:</p>
+<pre>
+pass rm Account-Name [or]
+pass rm -r Folder [to delete entire folder]
+</pre>
+<h3>PING</h3>
+<p>One of the values returned by <em>ping</em> is ttl. The ttl value can help to identify the pinged system's OS.</p>
+<table border='1' cellpadding='3'>
+<tr><td><strong>OS</strong></td><td><strong>ttl</strong></td></tr>
+<tr><td>Linux</td><td>64</td></tr>
+<tr><td>MacOS</td><td>64</td></tr>
+<tr><td>OpenBSD</td><td>255</td></tr>
+</table>
+<h3><p><a href="https://rclone.org/" rel="nofollow" target="_blank">RCLONE</a></p></h3>
+<p>Use rclone to sunchronize local files/folders with a Backblaze B2 bucket. On your home PC you should also install the Debian backblaze-b2 utility in order to manage your Backblaze buckets and account.<p>
+<pre>
+$ b2 create_bucket File-Cabinet-Master allPrivate
+$ rclone config # to set up or edit the configuration of remote storage
+$ rclone --progress sync /home/mm/File-Cabinet-Master b2_cabinet:File-Cabinet-Master
+$ rclone --progress sync b2_cabinet:File-Cabinet-Master scw_cabinet:file-cabinet
+$ rclone size b2_cabinet:File-Cabinet-Master
+</pre>
+<p>When synchronizing to an S2 bucket, you may want to add the --size-only flag in order to reduce the number of requests to the remote server.</p>
+<pre>
+rclone sync --progress --size-only /home/mm/File-Cabinet-Master scw_cabinet:file-cabinet
+</pre>
+<p>In addition to commercial remote services, you can also use rclone to synchronize over sftp to one of your own servers.</p>
+<pre>
+rclone --progress sync /home/mm/File-Cabinet-Master cedar_ssh:/home/mm/File-Cabinet-Master
+</pre>
+<p>When you set up a Backblaze B2 account as an rclone remote resource, you will need to use an application key.</p>
+<p>The above set of instructions allow you to synchronize using a local directory as the source and a B2 bucket as the destination. If you wish to reverse that and use the B2 bucket as the source and a local directory as the destination, then use the b2 tool:</p>
+<pre>
+$ b2 sync --dryRun --threads 1 b2://File-Cabinet-Master/ /home/mm/File-Cabinet-Master
+</pre>
+<p>The default number of threads is 10. I use only one to avoid annoying others in my household who are also using the network.</p>
+<h5>Some rclone examples</h5>
+<p>Copy a single file to a target directory:</p>
+<pre>
+rclone copy FILENAME remote:directory/ 
+</pre>
+<p>Notice the <strong>trailing slash</strong> following the target directory.</p>
+<p>If you wish to rename a file when you copy it, then you would use the <strong>copyto</strong> command:</p>
+<pre>
+rclone copyto FILENAME remote:directory/NEW-FILENAME
+</pre>
+<p>To mount a remote resource onto your filesystem:</p>
+<pre>
+rclone mount --daemon --vfs-cache-mode full remote: /local/mount/directory
+</pre>
+<p>You need the <strong>--vfs-cache-mode full</strong> in order to have full read-write access to the remote resource. The <strong>--daemon</strong> mode is needed under MacOS. To unmount under MacOS:</p>
+<pre>
+$ umount /Path/to/mount-point
+</pre>
+<p>To <strong>check</strong> if the source and the destination are the same
+without making any changes in either, run:</p>
+<pre>
+rclone check [--size-only --fast-list] source/directory scw_cabinet:
+</pre>
+<p>The --fast-list flag reduces the number of transactions in the request. This can resolve some 403 Rate Limit errors with Google Drive.</p>
+<p>If you wish to <strong>exclude</strong> a directory (such as, /source-directory/ignore-this-directory/) from a sync operation, you would  use a construction like the following:</p>
+<pre>
+rclone sync -P --exclude "/ignore-this-directory/**" /source-directory remote:target-directory
+</pre>
+<p>You need the double asterisk following the ignored directory in order to ignore subdirectories as well as the primary ignored directory. A single asterisk ignores all the files in the ignored directory but does not ignore subdirectories.</p>
+<h3><p><a href="https://dianne.skoll.ca/projects/remind/" rel="nofollow" target="_blank">REMIND</a></p></h3>
+<p>The remind package that ships with Debian Bookworm exhibits some strange behavior. The process continues to run in the background preventing me from logging out of my SSH sessions. So, whenever I start remind I need to kill the process before I try to exit my SSH session or the session will hang leaving more than just the remind process in a state of limbo.</p>
+<h3><a href="http://rsync.samba.org/examples.html" rel="nofollow" target="_blank">RSYNC</a></h3>
+<pre>
+rsync -avuP --delete source-directory/ host:/destination-directory
+</pre>
+<p>Notice that the source directory HAS a trailing slash, but that the destination directory does NOT have a trailing slash.</p>
+<p>Hetzner storage boxes only recognize <em>relative</em> paths. So, your rsync command will need to look something like:</p>
+<pre>
+rsync -avuP --delete local-directory/ hetzner:./directory
+                                              ^
+                                      notice the dot
+</pre>
+<p>Synchronize a single file:</p>
+<pre>
+rsync -avuP source-directory/filename host:/destination-directory/
+                                                                 ^
+</pre>
+<p>Notice that when synchronizing a single file a trailing slash <em>*DOES*</em> follow the destination directory.</p>
+<p>If you wish to <strong>exclude</strong> a directory (such as, /source-directory/ignore-this-directory/) from a sync operation, you would  use a construction like the following:</p>
+<pre>
+rsync -avuP --delete --exclude 'ignore-this-directory' /source-directory/ remote:/target-directory
+</pre>
+<p>If you need to preserve <strong>hard links</strong>, then you should use the</p>
+<pre>
+-H
+</pre>
+<p>switch.</p>
+<h3>SECURE_DELETE (FreeBSD) / SECURE-DELETE (Debian)</h3>
+<p>Overwrite with random data and delete all files and subdirectories of DIRECTORY</p>
+<pre>
+srm -llr DIRECTORY
+</pre>
+<p>Overwrite with zeroes and delete all files and subdirectories of DIRECTORY</p>
+<pre>
+srm -llzr DIRECTORY
+</pre>
+<p>Under OpenBSD, the standard <strong>rm</strong> command followed the <strong>-P</strong> switch overwrites files once with random data before deleting. Add the <strong>-R</strong> switch to remove the entire file hierarchy, including subdirectories.</p>
+<h3>SHRED</h3>
+<p>Shred is fairly straight-forward for operating on on individual files or groups of files in the same directory.</p>
+<pre>
+shred -n0 -z -u filename
+shred -n0 -z -u files*
+</pre>
+<p>Where shred gets tricky is when you need to delete all the files in a complex directory hierarchy. The way to do that is to combine <em>shred</em> with the <em>find</em> utility.</p>
+<pre>
+find DIRECTORY-NAME -type f -exec shred -n0 -zu {} \;
+</pre>
+<p>You can add the <strong>-v</strong> switch for more verbose output.</p>
+<h3>SMEM</h3>
+<p>Report chrome or chromium total memory usage:</p>
+<pre>
+smem -t -k -c pss -P chrom | tail -n 1
+</pre>
+<p>Report dropbox total memory usage:</p>
+<pre>
+smem -t -k -c pss -P dropb | tail -n 1
+</pre>
+<p>Report firefox total memory usage:</p>
+<pre>
+smem -t -k -c pss -P firef | tail -n 1
+</pre>
+<p>Report opera total memory usage:</p>
+<pre>
+smem -t -k -c pss -P opera | tail -n 1
+</pre>
+<p>Report yandex browser total memory usage:</p>
+<pre>
+smem -t -k -c pss -P yandex_b | tail -n 1
+</pre>
+<p>Report yandex disk total memory usage:</p>
+<pre>
+smem -t -k -c pss -P yandex-d | tail -n 1
+</pre>
+<p>Report vivaldi total memory usage:</p>
+<pre>
+smem -t -k -c pss -P vivaldi | tail -n 1
+</pre>
+<h3>SS</h3>
+<p>The ss command is a successor to netstat. (See <strong>netstat</strong> above.) As long as netstat is available it is still a useful tool.</p>
+<pre>
+ss -at
+</pre>
+<h3>SSH</h3>
+<p>Creating an SSH tunnel:</p>
+<pre>
+ssh -D 5222 remote-server -N
+
+-D = bind port
+-N = do not execute a remote command
+</pre>
+<p>To use with the Chromium browser:</p>
+<pre>
+chromium --proxy-server=socks5://localhost:5222
+</pre>
+<p>To use with Firefox, Pale Moon, etc.:</p>
+<pre>
+Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings
+
+Manual proxy configuration
+
+SOCKS Host: 127.0.0.1 Port: 5222
+
+No Proxy for:
+localhost, 127.0.0.1
+</pre>
+<h3>SSHFS</h3>
+<p>If you install sshfs, you can mount your remote servers as an ordinary user. Use the mount options uid and gid so that the remote directory will belong to the local user.</p>
+<pre>
+$ sshfs server-nickname:/home/username /local/mountpoint -o uid=1000,gid=1000
+</pre>
+<p>To unmount:</p>
+<pre>
+$ fusermount -u /local/mountpoint
+</pre>
+<h3>SYSCTL</h3>
+<p>Report hardware information on FreeBSD systems:</p>
+<pre>
+# sysctl hw.model hw.machine hw.ncpu
+</pre>
+<h3>TAR</h3>
+<p>To archive your /etc and /home directories:</p>
+<pre>
+# tar cvf /root/etc-home.tar /etc /home
+</pre>
+<p>To create an archive that excludes some files in the target:</p>
+<pre>
+tar cvf ~/archive.tar --exclude='excluded-directory/*' *
+</pre>
+<p>To list the files in an archive:</p>
+<pre>
+tar tvf archive.tar
+</pre>
+<p>The output of listing an archive's contents will look something like:</p>
+<pre>
+-rw-r--r-- user/group          1567 2019-12-12 10:50 ./file1.txt
+-rw-r--r-- user/group          1997 2019-12-12 10:50 ./file2.txt
+</pre>
+<p>You can <strong>remove</strong> an unwanted file from an archive in the following way:</p>
+<pre>
+tar --delete -f archive.tar ./file2.txt
+</pre>
+<p>where file2.txt is the unwanted file. You should note though that the --delete switch <strong>will not work</strong> on compressed archives.</p>
+<p>Compression:</p>
+<ul>
+  <li>bzip2 = j</li>
+  <li>gzip = z</li>
+  <li>xz = J</li>
+</ul>
+<p>Create an archive with a time stamp in the archive name:</p>
+<pre>
+suffix=`date +%F-%H.%M`
+tar cvf /home/user/archive-$suffix.tar /path/to/target-directory/
+</pre>
+<p>Create an empty archive:</p>
+<pre>
+tar -cvf archive.tar -T /dev/null
+</pre>
+<h3>TMUX</h3>
+<p>Ctrl-b to enter commands</p>
+<p>Detach the current session:</p>
+<pre>
+Ctrl-b d
+</pre>
+<p>Re-attach a previous session:</p>
+<pre>
+tmux attach -t 0
+</pre>
+<p>where "0" is the name of the previous session.</p>
+<p>A <a href="https://www.ocf.berkeley.edu/~ckuehl/tmux/" rel="nofollow" target="_blank">tmux beginner's guide</a>.</p>
+<p>A <a href="https://tmuxcheatsheet.com/" rel="nofollow" target="_blank">tmux cheat sheet</a>.</p>
+<h3>TR (translate)</h3>
+<p>Generate a string of characters based on a defined input. You can use this to generate passwords. For example, the following will generate a 16 character string drawn from capital letters, lower case letters, and numbers:</p>
+<pre>
+tr -dc A-Za-z0-9 &lt;/dev/urandom | head -c 16; echo
+</pre>
+<p>If you want to add some special characters into the mix:</p>
+<pre>
+tr -dc 'A-Za-z0-9!$&[]^%+=$' &lt;/dev/urandom | head -c 16; echo
+</pre>
+<h3><a href="https://linux.die.net/man/8/usermod" rel="nofollow" target="_blank">USERMOD</a></h3>
+<p>To change a user's primary login group:</p>
+<pre>
+usermod -g primarygroupname username
+</pre>
+<p>To add a user to a secondary group:</p>
+<pre>
+usermod -a -G secondarygroupname username
+</pre>
+<p>Using the <strong>-G</strong> switch without the <strong>-a</strong> switch will remove a user from all secondary groups except those specified by the current instance of the <strong>-G</strong> switch.</p>
+<p>Change a user's username:</p>
+<pre>
+usermod --login new-user-name --move-home --home /home/new-home-directory old-user-name
+</pre>
+<p>When you change a user's username you will likely also want to change the name of the user's primary group:</p>
+<pre>
+groupmod --new-name new-group-name old-group-name
+</pre>
+<p>In most cases, the new-group-name will be the same as the new-user-name, and the old-group-name will be the same as the old-user-name.</p>
+<h3>VIM</h3>
+<p>Find each occurrence of 'foo' and replace it with 'bar':</p>
+<pre>
+:%s/foo/bar/g
+</pre>
+<p>When you need vim to behave like traditional vi:</p>
+<pre>
+vim -u NONE -C
+</pre>
+<p>The -u switch specifies which vimrc file to use, with the NONE argument instructing vim not to load any vimrc initializations. The -C switch instructs vim to behave in a way that is compatible with traditional vi. The -C switch by itself does not work because without "-u NONE" vim will respect your vimrc initializations.</p>
+<p>Edit a remote file:</p>
+<pre>
+vim scp://user@server.com:22//home/user/filename
+</pre>
+<p>or</p>
+<pre>
+:e scp://user@server.com:22//home/user/filename # OR
+:e scp://SSH-Config-Host//home/user/filename # OR
+:e scp://SSH-Config-Host/filename # /home/user not needed because you
+                                  # are automatically logged into that
+                                  # directory
+</pre>
+<p>Browse a remote directory:</p>
+<pre>
+:e scp://user@server.com:22//home/user/
+:e scp://SSH-Config-Host// # Directory specification not needed if
+                           # you wish to browse the directory you are
+                           # initially logged into.
+</pre>
+<p><strong>Alternative Remote Construction</strong></p>
+<pre>
+:e sftp://user@server//path/to/file
+</pre>
+<p>Prompt for an encryption key:</p>
+<pre>
+:X
+</pre>
+<p>Center text [based on a 75 character-wide line]:</p>
+<pre>
+:ce [75]
+</pre>
+<p>Set the maximum number of characters on a line to 75</p>
+<pre>
+set tw=75
+</pre>
+<p>Various editing tasks:</p>
+<pre>
+dd delete current line
+~ switch case of characters (from CAPITALS to lower case or vice VERSA)
+U MAKE ALL SELECTED CHARACTERS CAPITALS/UPPER CASE
+u make all selected characters lower case
+J join next line to the current one
+&gt; indent selected lines
+gq apply text formatting to selected region
+
+" specify a register
+"+ specify the clipboard
+"+y copy to clipboard
+"+d cut to clipboard
+"+P paste from clipboard before cursor
+"+p paste from clipbaord after cursor
+</pre>
+<h5>Vim Scripts</h5>
+<p>To use vim scripts, install the Debian package vim-scripts. This will install many of the most useful scripts to the</p>
+<pre>
+/usr/share/vim-scripts
+</pre>
+<p>directory. Then, create a ~/.vim/plugin directory. Inside that directory, create a symbolic link to the script you wish to use.</p>
+<pre>
+ln -s /usr/share/vim-scripts/gnupg gnupg
+</pre>
+<h3>WEBDAV</h3>
+<p>Install package davfs2.</p>
+<p>Add user to group davfs2:</p>
+<pre>
+usermod -a -G davfs2 username
+</pre>
+<p>Create authentication file /home/user/.davfs2/secrets. Remove any "group" or
+"other" permissions:</p>
+<pre>
+chmod go-r /home/user/.davfs2/secrets
+</pre>
+<p>The "secrets" file should contain the line:</p>
+<pre>
+/home/user/mount-point dav-user@server [password]
+</pre>
+<p>Create entry in /etc/fstab:</p>
+<pre>
+https://server.tld /home/user/mount-point davfs noauto,user,uid=1000,gid=1000 0 0
+</pre>
+<p>Now, the ordinary user should be able to mount the remote storage with the
+command:</p>
+<pre>
+mount /home/user/mount-point
+</pre>
+<br />
+<hr>
+<h3>Miscellaneous</h3>
+<pre>
+echo 3 &gt; /proc/sys/vm/drop_caches
+</pre>
+<p>Do a searchon "drop_caches" for additional information, including the differences between echo 1, echo 2, and echo 3.</p>
+<h3>File Size Comparison</h3>
+<p>I keep all of my notes in a very large text file. Here is a size comparison of the notes in different formats (October 2018):</p>
+<pre>
+RAW TEXT  2708583 bytes (100.00%)
+DOCX      1254433 bytes ( 46.31%)
+ODT       1103976 bytes ( 40.76%)
+GZ TEXT   1040337 bytes ( 38.41%)
+XZ TEXT    796340 bytes ( 29.40%)
+BZ2 TEXT   763485 bytes ( 28.19%)
+</pre>
+<h3>Browser Memory Usage</h3>
+<p>PSS as reported by smem under my test scenario, January 19, 2021:</p>
+<pre>
+Chromium: 360M
+Firefox:  520M
+Palemoon: 180M
+Vivaldi:  210M
+</pre>
+<h3>Shell Notes</h3>
+<p>Memory usage reported by htop for different shells:</p>
+<p>FREEBSD 11.3</p>
+<pre>
+bash  7840  3956
+csh   7412  3800
+ksh93 8232  4196
+mksh  6608  2692
+sh    7068  3064
+tcsh  7412  3804
+</pre>
+<p>DEBIAN 10.1</p>
+<pre>
+bash  7599  4236
+dash  2388   700
+lksh   616   356
+mksh  3164  2144 (non-static)
+mksh   848   580 (static)
+tcsh  6656  3288
+</pre>
+<h3>Ping Speed</h3>
+<p>Average ping speed from home to servers December 2020.</p>
+<pre>
+almond:  26.698
+birch:  155.023
+cedar:   45.158
+elm:     47.287
+fir:     27.191
+larch:   45.240  
+teak:    65.452
+
+SD:      48.601
+</pre>
+<p>Average ping speed from home to servers July 2020.</p>
+<pre>
+birch:  153.272
+cedar:   71.759
+fir:     34.283
+larch:   92.014
+pine:   145.663
+
+SD:      44.081
+</pre>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+</body>
+
+</html>

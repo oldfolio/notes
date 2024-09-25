@@ -1,0 +1,22 @@
+#!/bin/sh
+# Returns the number of seconds until TOTP codes regenerate.
+# If you have fewer than 10 seconds left, it displays the
+# number of seconds in red.
+SEC=$( date +%S )
+TL1=$((30-$SEC))
+TL2=$((60-$SEC))
+
+if [ $TL2 -ge 30 ]; then
+ TL=$TL1
+ else
+ TL=$TL2
+ fi
+
+RED="\033[1;31m"
+NOCOLOR="\033[0m"
+
+if [ $TL -ge 10 ]; then
+ echo $TL
+ else
+ echo "${RED}$TL${NOCOLOR}"
+ fi

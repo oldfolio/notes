@@ -1,0 +1,43 @@
+#!/bin/sh
+if [ -f $1.asc ]; then
+  gpg1 $1.asc
+  sleep 2
+  vim $1
+  sleep 2
+  gpg1 -e -a -r user $1
+  else
+  vim $1
+  sleep 2
+  gpg1 -e -a -r user $1
+  fi
+shred -n 1 -u $1
+
+### ALTERNATIVE USING SYMMETRICAL ENCRYPTION ###
+#!/bin/sh
+if [ -f $1.asc ]; then
+  gpg1 $1.asc
+  sleep 2
+  vim $1
+  sleep 2
+  gpg1 -a -c $1
+  else
+  vim $1
+  sleep 2
+  gpg1 -a -c $1
+  fi
+shred -n 1 -u $1
+
+### ALTERNATIVE USING BINARY OUTPUT WITH SYMMETRICAL ENCRYPTION ###
+#!/bin/sh
+if [ -f $1.gpg ]; then
+  gpg1 $1.gpg
+  sleep 2
+  vim $1
+  sleep 2
+  gpg1 -c $1
+  else
+  vim $1
+  sleep 2
+  gpg1 -c $1
+  fi
+shred -n 1 -u $1

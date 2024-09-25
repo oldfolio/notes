@@ -1,0 +1,77 @@
+! ~/.Xresources file
+!
+! After updating this file, run:
+! $ xrdb ~/.Xresources
+! to reload
+!
+! Highlight text and middle click to copy text
+! Middle click again to paste text
+! Right click on the scroll bar goes backward
+! Left click on scroll bar goes forward
+! Make xterm cuts available to general clipboard
+XTerm*selectToClipboard: true
+
+!xterm*faceName: BitStream Vera Sans Mono
+!xterm*faceName: DejaVu Sans Mono
+!xterm*faceName: Liberation Mono
+xterm*faceName: Monospace
+xterm*faceSize: 13
+!xterm*faceSize: 14
+!xterm*font: *-fixed-*-*-*-20-*
+!xterm*reverseVideo: on
+xterm*foreground: #000000
+xterm*background: #fffff9
+xterm*scrollBar: true
+xterm*geometry: 80x26
+
+! Added to test enhancements suggested here:
+! https://aduros.com/blog/xterm-its-better-than-you-thought/
+XTerm.vt100.translations: #override \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD)
+
+! My color customizations
+XTerm.vt100.color0: Black
+XTerm.vt100.color1: Maroon
+XTerm.vt100.color2: DarkGreen
+XTerm.vt100.color3: SaddleBrown
+XTerm.vt100.color4: Blue
+XTerm.vt100.color5: Purple
+XTerm.vt100.color6: SteelBlue
+XTerm.vt100.color7: Gray
+
+XTerm.vt100.color8: Silver
+XTerm.vt100.color9: Salmon
+XTerm.vt100.color10: MediumSeaGreen
+XTerm.vt100.color11: Yellow
+XTerm.vt100.color12: MediumBlue
+XTerm.vt100.color13: MediumOrchid
+XTerm.vt100.color14: DodgerBlue
+XTerm.vt100.color15: WhiteSmoke
+
+! Urxvt: By default Ctrl-Alt-c = copy,
+! and Ctrl-Alt v = paste
+URxvt*geometry: 80x26
+URxvt*foreground: #000000
+URxvt*background: #fffffb
+URxvt*font: xft:Monospace:size=12
+!URxvt*faceSize: 14
+
+URxvt*color0: Black
+URxvt*color1: Maroon
+URxvt*color2: DarkGreen
+URxvt*color3: SaddleBrown
+URxvt*color4: Blue
+URxvt*color5: Purple
+URxvt*color6: SteelBlue
+URxvt*color7: Gray
+
+URxvt*color8: Silver
+URxvt*color9: Salmon
+URxvt*color10: MediumSeaGreen
+URxvt*color11: Yellow
+URxvt*color12: MediumBlue
+URxvt*color13: MediumOrchid
+URxvt*color14: DodgerBlue
+URxvt*color15: WhiteSmoke
+

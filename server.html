@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: Server Notes</title>
+</head>
+
+<body>
+<h1>Server Notes</h1>
+<p>For that pre-installation task of choosing a name for your server, see the ancient RFC 1178 <a href="https://tools.ietf.org/html/rfc1178">Choosing a Name for Your Computer</a>. I prefer to name my servers after <a href="https://namingschemes.com/Trees">trees</a>.</p>
+<hr>
+<h3>Initial Installation</h3>
+<p>If you wish to install recent Debian versions with sysvinit instead of systemd, you should do the following: At the installation menu, "tab" on your choice of installation methods and append the following to the boot options:</p>
+<pre>
+preseed/late_command="in-target apt-get install -y sysvinit-core"
+</pre>
+<p>Launch the installation and continue as normal.</p>
+<h3>SSHD Configuration</h3>
+<p>After you have set up an ordinary user who can su to the root user (<em>i.e.</em>, is a member of the <em>wheel</em> group in FreeBSD), you should disable root logins, by adding the following line:</p>
+<pre>
+PermitRootLogin no
+</pre>
+<p>to your /etc/ssh/sshd_config file.</p>
+<p>If you are slightly more adventurous, you could deny password logins by the root user, but allow root to login using an SSH key:</p>
+<pre>
+PermitRootLogin prohibit-password
+</pre>
+<p>If you are <em>less</em> adventurous, you could deny password logins to everyone and require all users to login using an SSH key:</p>
+<pre>
+PubkeyAuthentication yes # This is often the default
+PasswordAuthentication no # This is often the default
+ChallengeResponseAuthentication no # This is often NOT the default
+</pre>
+<p>Of course, you should make sure that key logins are working before disabling password logins. Even after you disable ChallengeResponseAuthentication you should probably leave UsePAM set to yes, because PAM controls more than login authentication.</p>
+<p>To enable key login for a user, add the user’s SSH public key to the file:</p>
+<pre>
+~/.ssh/<a href="dot/authorized_keys.txt">authorized_keys</a>
+</pre>
+<p>Some additional steps you can take to restrict SSH logins even more are limiting which user groups are permitted to connect via SSH and reducing the time that users have to complete their login transaction before being requested to try again.</p>
+<p>Create an <strong>ssh-users</strong> user group:</p>
+<pre>
+addgroup --gid 600 ssh-users
+</pre>
+<p>Add the appropriate users to the ssh-users group:</p>
+<pre>
+usermod -a -G ssh-users <em>user-name</em>
+</pre>
+<p>Restrict SSH login to members of that group in your /etc/ssh/sshd_config file:</p>
+<pre>
+AllowGroups ssh-users
+</pre>
+<p>Reduce the login grace time from the default two minutes to thirty seconds:</p>
+<pre>
+LoginGraceTime 30
+</pre>
+<h3>Miscellaneous Initial Setup Tasks</h3>
+<p>Some initial tasks you might need to do on some VPSs with minimal <strong>Debian</strong> installations: dpkg-reconfigure locales, install bsdutils, debian-keyring, debian-archive-keyring, dialog, apt-utils, man-db, manpages and openssl. You might also want to run ssh-keygen -A, which generates host keys for any key type that does not already exist. (In some rare cases, you may need to change the permissions of /dev/tty to 0666 in order to get mksh to work.)</p>
+<p>Lower the system load average under <strong>FreeBSD</strong>:</p>
+<pre>
+# sysctl kern.eventtimer.periodic=1
+</pre>
+<p>You can make the above sysctl change permanent by adding the line:</p>
+<pre>
+kern.eventtimer.periodic=1
+</pre>
+<p>to your /etc/sysctl.conf file.</p>
+<p>To completely disable sendmail in FreeBSD, add the following lines:</p>
+<pre>
+sendmail_enable="NONE"
+sendmail_submit_enable="NO"
+sendmail_outbound_enable="NO"
+sendmail_msp_queue_enable="NO"
+</pre>
+<p>to the /etc/rc.conf file.</p>
+<h4>Adding Static IPv6</h4>
+<p>Debian (/etc/network/interfaces)</p>
+<pre>
+iface ens3 inet6 static
+address 0:0:0:0::0
+netmask 64
+gateway 0:0:0::1
+</pre>
+<p>or, replace the "gateway" line with:</p>
+<pre>
+post-up /sbin/ip -6 route add 0:0:0::1 dev ens3
+post-up /sbin/ip -6 route add default via 0:0:0::1 dev ens3
+pre-down /sbin/ip -6 route del default via 0:0:0::1 dev ens3
+pre-down /sbin/ip -6 route del 0:0:0::1 dev ens3
+</pre>
+<p>If you set up an IPv6 address using the first approach above, you can add a second IPv6 address by simply appending two lines to your interfaces file of the sort:</p>
+<pre>
+iface ens3 inet6 static
+address 0:0:0:0::2
+</pre>
+<p>FreeBSD (/etc/rc.conf)</p>
+<p>The following template shows how to add two IPv6 addresses on a BuyVM slice. Notice that for the second IPv6 address, the ipv6 suffix is not added to the interface name. It is simply ...em0_alias0, not ...em0_ipv6_alias0.</p>
+<pre>
+ipv6_activate_all_interfaces="YES"
+ifconfig_em0_ipv6="inet6 0:0:0:0::2 prefixlen 48"
+ifconfig_em0_alias0="inet6 0:0:0:0::3 prefixlen 48"
+ipv6_defaultrouter="0:0:0::1"
+</pre>
+<p>OpenBSD</p>
+<p>Create /etc/mygate file with the defaultrouter address.</p>
+<pre>
+0:0:0:0::1
+</pre>
+<p>Edit /etc/hostname.xnf0 to include the IPv6 address and the
+prefixlen. The "dhcp" line is for IPv4 and was created during
+the OS installation.</p>
+<pre>
+inet6 0:0:0:0:0:0:fe:fef 64
+dhcp
+</pre>
+<p>Restart the network with:</p>
+<pre>
+# sh /etc/netstart
+</pre>
+<p>The netmask (prefixlen) is 64 at Hetzner, OVH, prgmr.com, and Ramnode, 112 at TinyKVM, and 48 at BuyVM and Veesp.</p>
+<h4>Adding Static IPv4</h4>
+<p>On FreeBSD systems, add the following lines to your /etc/rc.conf file:</p>
+<pre>
+ifconfig_vtnet0="inet XXX.XXX.XXX.XXX netmask 255.255.255.0"
+defaultrouter="XXX.XXX.XXX.1"
+</pre>
+<h4>Resizing your Debian / partition at OVH</h4>
+<p>Reboot into rescue mode.</p>
+<p>SSH into rescue environment.</p>
+<pre>
+lsblk
+
+umount /dev/sdb1
+fsck -fy /dev/sdb1
+resize2fs /dev/sdb1 4320M
+fsck -fy /dev/sdb1
+
+fdisk /dev/sdb
+p - print partition table
+d - delete partition
+n - create new partition
+  - default start block
+  - end block: +4320M
+w - write new partition table and exit
+
+fsck -fy /dev/sdb1
+
+fdisk /dev/sdb
+p - print partition table
+n - create whatever new partitions you need
+</pre>
+<p>Reboot in normal mode.</p>
+<p>You can resize the / partition on a <strong>Scaleway</strong> VPS in a similar fashion, <em>but</em> you will need to do a couple of additional steps <strong>before you reboot</strong>. First, you will need to chroot into the installed system:</p>
+<pre>
+mount /dev/vda1 /mnt
+chroot /mnt
+cd /etc
+</pre>
+<p>You will then need to edit the fstab file to use device names instead of block IDs because the block ID of /dev/vda1 will have changed after the resizing. You will also need to change the error behavior of the efi boot partition:</p>
+<pre>
+/dev/vda1 / ext4 rw,relatime 0 1
+/dev/vda15 /boot/efi vfat rw,relatime,<span style="color:red;font-weight:bold">errors=continue</span> 0 0
+</pre>
+<p>Now, re-set the server to boot from the hard drive, and reboot.</p>
+<h4>Resizing your FreeBSD / partition at OVH</h4>
+<p>On the OVH VPS models that support FreeBSD, the template installation provides a file system of only 4G. You will need to resize the file system following the instructions in <a href="https://docs.ovh.com/us/en/public-cloud/resize-file-system-freebsd-12-instance/">the OVH guide</a>.</p>
+<pre>
+sudo gpart show
+sudo gpart recover vtbd0
+sudo gpart show
+sudo gpart resize -i 2 vtbd0
+</pre>
+<h4>Adding a Second Disk under FreeBSD</h4>
+<pre>
+gpart add -t freebsd da0
+
+da0s1 added
+
+newfs -U /dev/da0s1
+</pre>
+<p>By default, FreeBSD's UFS file system reserves 8% for itself. The documentation says that setting this to 5% or less causes "space optimization to always be used which will greatly increase the overhead for file writes."</p>
+<h4>Adding a New User</h4>
+<p>Under both <a href=https://manpages.debian.org/buster/adduser/adduser.8.en.html>Debian</a> and <a href=https://www.freebsd.org/cgi/man.cgi?query=adduser>FreeBSD</a> the <strong>adduser</strong> utility is used to add new users to the system. Under Debian:</p>
+<pre>
+# adduser [new-user-name]
+</pre>
+<p>Under FreeBSD:</p>
+<pre>
+# adduser
+</pre>
+<p>and then follow the prompts. Debian populates the new user's home directory from <strong>/etc/skel</strong>. FreeBSD uses <strong>/usr/share/skel</strong>. When you install the <strong>mksh</strong> package it will create a sample ~/.mkshrc file in /etc/skel under Debian and in /usr/local/share/examples/mksh under FreeBSD.</p>
+<hr>
+<h4>Some Errors I have encountered at Kimsufi on fresh FreeBSD installations</h4>
+<h5>(1) FreeBSD Update Error on Kimsufi</h5>
+<p>Caused by Kimsufi's default /etc/resolv.conf</p>
+<p>Replace resolv.conf with your own file:</p>
+<pre>
+nameserver 1.1.1.1
+nameserver 1.0.0.1
+</pre>
+<p>and the problem goes away.</p>
+<h5>(2) FreeBSD adduser error</h5>
+<pre>
+Error adding new user - pw: user 'oldfolio' disappeared during update
+</pre>
+<p>This issue is not common. And it’s caused by databases being out of sync. To fix this issue, just run:</p>
+<pre>
+/usr/sbin/pwd_mkdb -p /etc/master.passwd
+</pre>
+<p>Solution taken from <a href="https://www.syxin.com/2017/06/freebsd-error-adding-new-user-pw-user-mysql-disappeared-during-update/" rel="nofollow" target="_blank">this site</a>.</p>
+<h5>(3) FreeBSD pkg update error</h5>
+<p>By default, Kimsufi's FreeBSD installations are set to use OVH's own pkg repository, configured here:</p>
+<pre>
+/usr/local/etc/pkg/repos/OVH.conf
+</pre>
+<p>This repository is not always up to date. So, I disable it (by changing the file extension to anything other than .conf).</p>
+<hr>
+<h3>Setting Up a Gopher Server</h3>
+<p>Install pygopherd. The default configuration (on Debian systems found at /etc/pygopherd/pygopherd.conf, on FreeBSD systems found at /usr/local/etc/pygopherd/pygopherd.conf) should work fine but read it anyway so that you understand what pygopherd is doing. Pygopherd will serve files from the /var/gopher directory. All files in that directory (and its subdirectories) must belong to owner gopher and group gopher.</p>
+<p>Under FreeBSD, an easy way to start the gopher server automatically on system reboots is to add to the root user’s crontab:</p>
+<pre>
+@reboot /usr/local/bin/pygopherd
+</pre>
+<p>One thing to notice here is the contrast between the simplicity of setting up a gopher server and the complexity of setting up a web server.</p>
+<p>BUCKTOOTH</p>
+<p>If you've installed the bucktooth server instead of pygopherd, you can disable bucktooth with:</p>
+<pre>
+# update-inetd --disable gopher
+</pre>
+<p>You can re-enable it later with:</p>
+<pre>
+# update-inetd --enable gopher
+</pre>
+<p>GOPHERNICUS UNDER OPENBSD</p>
+<p>Follow the directions you will find here:</p>
+<pre>
+/usr/local/share/doc/pkg-readmes/gophernicus
+</pre>
+<p>Add the following line to /etc/inetd.conf (which you may need to create):</p>
+<pre>
+gopher stream tcp nowait _gophernicus /usr/local/libexec/in.gophernicus in.gophernicus -h gopher.oldfolio.org
+</pre>
+<p>Add the following line to /etc/rc.conf.local (which you may need to create):</p>
+<pre>
+inetd_flags=
+</pre>
+<p>Restart /etc/rc.d/inetd.</p>
+<p>For further information, read the documentation found in:</p>
+<pre>
+/usr/local/share/doc/gophernicus/
+</pre>
+<hr>
+<h2>Setting Up Web Sites</h2>
+<h3>Preface</h3>
+<p>Drew Devault has <a href="https://sourcehut.org/blog/2020-05-27-accessibility-through-simplicity/" rel="nofollow" target="_blank">a great article</a> about web site design in which he emphasizes that approaches to design that make a site easier to navigate for visually impaired persons also make the site easier to navigate for <em>everyone</em>. Perhaps his best piece of advice is:</p>
+<blockquote>
+Make sure your page is organized so that if read linearly, from start to finish, without CSS, it still makes sense. Avoid littering marketing garbage...throughout your page.
+</blockquote>
+<p>General note about serving web sites: If your server only has an IPv6 address, I have found two options for serving sites over IPv4:</p>
+<ul>
+<li>Use Cloudflare's DNS, and set Cloudflare to proxy.</li>
+<li>Add an A record for the <a href="http://v4-frontend.netiter.com/" rel="nofollow" target="_blank">Netiter proxy service</a>.</li>
+</ul>
+<h3>Setting Up an Nginx Web Server</h3>
+<p>Because of my minimal needs, the <strong>Debian</strong> package to install is <em>nginx-light</em>. Under <strong>FreeBSD</strong>, the package to install is <em>nginx-lite</em>.</p>
+<p>The installation under FreeBSD 11 returns the following message:</p>
+<pre>
+===================================================================
+Recent version of the NGINX introduces dynamic modules support.  In
+FreeBSD ports tree this feature was enabled by default with the DSO
+knob.  Several vendor's and third-party modules have been converted
+to dynamic modules.  Unset the DSO knob builds an NGINX without
+dynamic modules support.
+
+To load a module at runtime, include the new `load_module'
+directive in the main context, specifying the path to the shared
+object file for the module, enclosed in quotation marks.  When you
+reload the configuration or restart NGINX, the module is loaded in.
+It is possible to specify a path relative to the source directory,
+or a full path, please see
+https://www.nginx.com/blog/dynamic-modules-nginx-1-9-11/ and
+http://nginx.org/en/docs/ngx_core_module.html#load_module for
+details.
+
+Default path for the NGINX dynamic modules is
+
+/usr/local/libexec/nginx.
+===================================================================
+</pre>
+<p>To your FreeBSD /etc/rc.conf file, add the line:</p>
+<pre>
+nginx_enable="YES"
+</pre>
+<p>Links to the site configuration files for the active sites that nginx should be serving should be placed in an <em>nginx/sites-enabled</em> directory. Under <strong>Debian</strong>, the nginx directory will be found under /etc. Under <strong>FreeBSD</strong>, it will be found under /usr/local/etc. You may also need to create the sites-enabled directory under FreeBSD.</p>
+<p>You may further need to edit the nginx/nginx.conf file to add an “include” line to tell nginx to use the sites-enabled directory. I usually add the line just below the gzip settings.</p>
+<p>Debian:</p>
+<pre>
+include /etc/nginx/conf.d/*.conf;
+include /etc/nginx/sites-enabled/*;
+</pre>
+<p>FreeBSD:</p>
+<pre>
+include /usr/local/etc/nginx/conf.d/*.conf;
+include /usr/local/etc/nginx/sites-enabled/*;
+</pre>
+<p>Test the new configuration changes:</p>
+<pre>
+nginx -t
+</pre>
+<p>If everything is working, reload (or start) nginx:</p>
+<pre>
+nginx -s reload
+</pre>
+<p><strong>Site Configuration Files</strong></p>
+<p>There is a useful nginx site configuration wizard at digital ocean here:</p>
+<p><a href="https://www.digitalocean.com/community/tools/nginx" rel="nofollow" target="_blank">https://www.digitalocean.com/community/tools/nginx</a></p>
+<p>A minimal site configuration file will look something like:</p>
+<pre>
+server {
+  listen 80;
+  listen [::]:80;
+  root /path/to/site-root;
+  server_name www.domain.tld;
+  }
+</pre>
+<p>The two <strong>listen</strong> lines are necessary if you want the server to listen on both IPv4 and <strong>IPv6</strong>. Otherwise, the server will listen only on IPv4, returning errors to requests made over IPv6.</p>
+<p>To redirect a bare domain to the www subdomain, you can use a configuration that looks something like:</p>
+<pre>
+server {
+  listen 80;
+  listen [::]:80;
+  server_name domain.tld;
+  return 301 http://www.domain.tld;
+  }
+</pre>
+<p>To serve custom 404 error pages, create a 404.conf file in the nginx/conf.d directory with the line:</p>
+<pre>
+error_page   404  =  /404.html;
+</pre>
+<p>Likewise, any aspect of site configuration that will be the same across all of your sites can be specified in a file ending with the .conf extention placed in the nginx/conf.d directory. Be careful with the “Content Security Policy” because it can break HTML and CSS styling elements. In any case, you might have a custom.conf file that looks like:</p>
+<pre>
+error_page   404  =  /404.html;
+
+add_header Referrer-Policy no-referrer;
+add_header X-Frame-Options SAMEORIGIN;
+add_header Content-Security-Policy "default-src 'self';" always;
+add_header X-Xss-Protection "1; mode=block" always;
+add_header X-Content-Type-Options "nosniff" always;
+</pre>
+<p>If you wish to display a directory listing instead of an index file, you can add the autoindex directive to the directory that you wish to display as a file listing.</p>
+<pre>
+location /files-directory/ {
+  # If you have a root path defined in any other location block,
+  # such as a Server Side Includes block, then you need to specify
+  # the root path in autoindex blocks.
+  root /path/to/site-root;
+  autoindex on;
+  }
+</pre>
+<p><strong>Pygopherd</strong> will serve your gopher site over HTTP if you point your web browser to port 70. You can use nginx to <strong>proxy</strong> requests from port 80 (the default http port) to port 70 using a site config file something like what follows:</p>
+<pre>
+server {
+  root /var/gopher;
+  server_name gopher.oldfolio.org;
+  location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_pass http://localhost:70;
+  }
+}
+</pre> 
+<p><strong>Server Side Includes</strong></p>
+<p>For your nginx site config files, use a construction like:</p>
+<pre>
+location ~ \.html$ {
+  ssi on;
+  }
+</pre>
+<p>Honor the <a href=https://en.wikipedia.org/wiki/Discworld_gods>gods of the Discworld</a> by adding the following header to your server block:</p>
+<pre>
+server {
+  ...
+  add_header X-Clacks-Overhead "GNU Terry Pratchett";
+}
+</pre>
+<br />
+<h3>OpenBSD: nginx</h3>
+<p>The primary configuration directory is</>
+<pre>
+/etc/nginx
+</pre>
+<p>NOT</p>
+<pre>
+/usr/local/share/nginx
+</pre>
+<p>In the OpenBSD nginx package, nginx runs chrooted requiring files to be served from</p>
+<pre>
+/var/www/htdocs
+</pre>
+<p>or its subdirectories for virtual hosts.</p>
+<p>If you wish to serve files from outside of that directory, you can override the above behavior by using the -u switch when you start or reload nginx.</p>
+<pre>
+nginx -u
+nginx -u -s reload
+</pre>
+<p>Of course, the default behavior is more secure.</p>
+<br />
+<hr>
+<h3>Adding SSL/TLS Support</h3>
+<p>I use SSL/TLS certificates from <a href="https://letsencrypt.org/">Let’s Encrypt</a>. The <em>certbot</em> utility makes it easy to create and manage Let’s Encrypt certificates. Under <strong>Debian</strong>, install the package <em>certbot</em>. Under <strong>FreeBSD</strong>, install the package <em>py37-certbot</em>.</p>
+<p>The FreeBSD installation returns the following message:</p>
+<pre>
+===========================================================================
+
+This port installs the "standalone" client only, which does not use and
+is not the certbot-auto bootstrap/wrapper script.
+
+The simplest form of usage to obtain certificates is:
+
+ # sudo certbot certonly --standalone -d &lt;domain&gt;, [domain2, ... domainN]
+
+NOTE:
+
+The client requires the ability to bind on TCP port 80 or 443 (depending
+on the --preferred-challenges option used). If a server is running on that
+port, it will need to be temporarily stopped so that the standalone server
+can listen on that port to complete the challenge authentication process.
+
+For more information on the 'standalone' mode, see:
+
+  https://certbot.eff.org/docs/using.html#standalone
+
+The certbot plugins to support apache and nginx certificate installation
+will be made available in the following ports:
+
+ * Apache plugin: security/py-certbot-apache
+ * Nginx plugin: security/py-certbot-nginx
+
+===========================================================================
+</pre>
+<p><strong>!! IMPORTANT !!</strong>: The default server (usually the first specified site in /etc/nginx/sites-enabled/, and often /etc/nginx/sites-enabled/default) <strong>MUST</strong> be accessible over HTTPS with a valid certificate for HTTPS to work with any other sites enabled. So, secure that default site first before trying to configure HTTPS for any other sites.</p>
+<p>It is also important to remember that <strong>THE NGINX SERVER MUST BE STOPPED</strong> when you are running the stand-alone version of certbot.</p>
+<p>With nginx stopped, run:</p>
+<pre>
+certbot certonly --standalone -d domain.tld -d www.domain.tld
+</pre>
+<p>For multiple domains, you must use multiple -d switches. The -d switch with a comma separated list is no longer supported. You will be prompted to enter an email address for renewal notifications. Unless certbot encounters errors, your new certificate will be found at:</p>
+<pre>
+/etc/letsencrypt/live/www.domain.tld/fullchain.pem
+</pre>
+<p>or</p>
+<pre>
+/usr/local/etc/letsencrypt/live/www.domain.tld/fullchain.pem
+</pre>
+<p>depending on whether you are running under Debian or FreeBSD. The certificate’s private key will be found at either:</p>
+<pre>
+/etc/letsencrypt/live/www.domain.tld/privkey.pem
+</pre>
+<p>or</p>
+<pre>
+/usr/local/etc/letsencrypt/live/wwww.domain.tld/privkey.pem
+</pre>
+<p>To renew your certificates, stop nginx and run:</p>
+<pre>
+certbot renew
+</pre>
+<p>If you wish to test the renewal process, stop nginx and run:</p>
+<pre>
+certbot renew --dry-run
+</pre>
+<p>After renewing certificates, you must <strong>RELOAD NGINX</strong> in order for nginx to pick up the renewed certificates. (Do you need to <strong>reload postfix</strong> and <strong>dovecot</strong> as well?)</p>
+<p>To see what certificates certbot has installed on your system, you can run:</p>
+<pre>
+certbot certificates
+</pre>
+<p>To delete an installed certificate, you can run:</p>
+<pre>
+certbot delete
+</pre>
+<p>and then select from the returned list of certificates. Or, you could run:</p>
+<pre>
+certbot delete --cert-name domain.tld
+</pre>
+<p>In addition to obtaining certificates from Let's Encrypt, you can also use certbot to obtain free certificates from Norwegian certificate authority <a href="https://www.buypass.com/ssl/products/acme">BuyPass</a>. Just click on the "Get Started" button for instructions. The process is almost exactly the same. The only difference is that you will need to register with BuyPass using the following commmand:</p>
+<pre>
+certbot register -m 'user@email.com' --agree-tos --server 'https://api.buypass.com/acme/directory'
+</pre>
+<p>and when you initially request a certificate you will need to append the command line option:</p> 
+<pre>
+--server 'https://api.buypass.com/acme/directory'
+</pre>
+<p>Renewals should work without any modifications at all to the command for renewing a Let's Encrypt certificate.</p>
+<p>One other point to keep in mind: BuyPass certificates are good for 180 days as opposed to Let's Encrypt certificates, which are good for 90 days.</p>
+<p>More recent versions of certbot (i.e., more than the version included in Debian 10) allow you to specify <strong>ECDSA</strong> keys instead of the default RSA:</p>
+<pre>
+certbot certonly --standalone -d site.oldfolio.org --key-type ecdsa
+</pre>
+<p><strong>!! ONE FINAL IMPORTANT NOTE</strong>: In order to use TLSv1.3 on your sites under Debian 10, you <strong>MUST</strong> add</p>
+<pre>
+TLSv1.3
+</pre>
+<p>to the ssl_protocols line in your main /etc/nginx/nginx.conf file. Simply adding it your specific site files is <strong>NOT</strong> sufficient. Moreover, you should probably remove older protocols from the ssl_protocols line as well as adding TLSv1.3. In fact, you <strong>MUST</strong> remove all protocols prior to TLSv1.2 in order to get an "A" at the Qualys SSL Lab test site.</p>
+<p>The general rule is: If nginx's default site does not connect over TLSv1.3, then neither will any other configured sites, even if they specify TLSv1.3.</p> 
+<h4>DH Params</h4>
+<p>Update: If you are using only TLSv1.2 or newer, you do not need to install a DH Params key.</p>
+<p>If you have not already done so, you will need to create a DH Params key. In the</p>
+<pre>
+/etc/ssl/
+</pre>
+<p>directory, run:</p>
+<pre>
+openssl dhparam -out dhparams.pem 4096
+</pre>
+<p>This may take a long time, but once it is done you should be ready to implement HTTPS.</p>
+<h4>HTTPS Site Configuration</h4>
+<p>In order to implement HTTPS on one of your sites, create two server blocks in the site configuration file. The first block will redirect HTTP traffic to HTTPS:</p>
+<pre>
+server {
+  listen 80;
+  listen [::]:80;
+  root /path/to/site-root;
+  server_name www.domain.tld;
+  return 301 https://$server_name$request_uri;
+  error_page 404 /404.html;
+  }
+</pre>
+<p>The second block is for serving the site over HTTPS. Here is the format:</p>
+<pre>
+server {
+  root /path/to/site-root;
+  server_name www.domain.tld;
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_certificate /etc/letsencrypt/live/www.domain.tld/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/www.domain.tld/privkey.pem;
+  ssl_stapling on;
+  ssl_stapling_verify on;
+  ssl_trusted_certificate /etc/letsencrypt/live/www.domain.tld/chain.pem;
+  }
+</pre>
+<p>A more complete example can be found in this <a href="dot/nginx-tls.txt">file</a>. (For sites behind Cloudflare, see this <a href="dot/nginx-tls-cf.txt">file</a>.) My examples do not show support for the TLSv1.3 protocol even though it is currently (January 2019) considered the most secure of the TLS protocols. That is because the Debian nginx package does not support the protocol. I <em>have</em> been able to get TLS 1.3 working under FreeBSD 12.1 (by installing the nginx-devel package instead of the standard nginx package). A sample nginx site configuration file is <a href="dot/a0-tls-1.3.txt">here</a>.</p>
+<p>For more information about which ciphers and protocols to use, see Mozilla's <a href="https://wiki.mozilla.org/Security/Server_Side_TLS">server side TLS recommendations</a>. Mozilla even has an <a href="https://mozilla.github.io/server-side-tls/ssl-config-generator/">SSL configuration generator</a> that you can use.</p>
+<p>To get inline CSS styling to work, add the following to your Content-Security-Policy line in the nginx configuration file for the site:</p>
+<pre>
+style-src 'nonce-2726c7f26c'
+</pre>
+<p>The "nonce" indicator is a special content security policy directive, and the string following it ("2726c7f26c") could have been anything. Once you set this in the nginx configuration file</p>
+<pre>
+add_header Content-Security-Policy "default-src 'self'; img-src 'self'; object-src 'none'; script-src 'self'; style-src 'nonce-2726c7f26c'";
+</pre>
+<p>you will need to add the following to the header of the html file serving the styled page:</p>
+<pre>
+&lt;style nonce="2726c7f26c"&gt;
+</pre>
+<p>Content-Security-Policy if you wish to use <a href="https://docs.xz.style/fonts/">XZ fonts</a>:</p>
+<pre>
+style-src 'self' https://fonts.xz.style; font-src 'self' https://fonts.xz.style
+</pre>
+<p>Content-Security-Policy if you wish to use Google fonts:</p>
+<pre>
+style-src 'self' fonts.googleapis.com fonts.gstatic.com; font-src fonts.googleapis.com fonts.gstatic.com
+</pre>
+<h4>Adding PHP</h4>
+<p>(Under OpenBSD 6.6 PHP-FPM is included as part of the standard PHP package, not as a separate package.)</p>
+<p>Much of the information in my notes is dated. That is especially true of the PHP information. In any case, PmWiki needs the PHP session module, so:</p>
+<pre>
+apt-get install php-fpm
+</pre>
+<p>or</p>
+<pre>
+pkg install php74-session
+</pre>
+<pre>
+cp /usr/local/etc/php.ini-production /usr/local/etc/php.ini
+</pre>
+<p>In the php.ini file, find the line</p>
+<pre>
+;cgi.fix_pathinfo=1
+</pre>
+<p>and change it to</p>
+<pre>
+cgi.fix_pathinfo=0
+</pre>
+<p>(although the above no longer seems necessary).</p>
+<p>Add the line</p>
+<pre>
+php_fpm_enable="YES"
+</pre>
+<p>to /etc/rc.conf</p>
+<p>Edit the file /usr/local/etc/php-fpm.d/www.conf. Note that you <strong>MUST</strong> uncomment the appropriate listen.owner, listen.group, and listen.mode lines even if they appear to be the default.</p>
+<pre>
+; listen = 127.0.0.1:9000
+listen = /var/run/php-fpm.sock
+listen.owner = www
+listen.group = www
+listen.mode = 0660
+</pre>
+<p>Start or re-start php-fpm:</p>
+<pre>
+/usr/local/etc/rc.d/php-fpm start | stop | restart | onereload
+</pre>
+<p>Add the following lines to the serve blocks of the sites on which you wish to enable PHP:</p>
+<pre>
+index index.php index.html;
+
+location ~ \.php$ {
+  try_files $uri =404;
+  fastcgi_split_path_info ^(.+\.php)(/.+)$;
+  fastcgi_pass unix:/var/run/php-fpm.sock;
+  fastcgi_index index.php;
+  fastcgi_param SCRIPT_FILENAME $request_filename;
+  include fastcgi_params;
+  }
+</pre>
+<p>If you are enabling PHP on a site served only over HTTPS, you can omit the</p>
+<pre>
+index index.php index.html;
+</pre>
+<p>line in the listen 80; block that simply redirects to HTTPS.</p>
+<p>I added the "try_files" directive to the PHP location block above in the wake of <a href=https://www.tenable.com/blog/cve-2019-11043-vulnerability-in-php-fpm-could-lead-to-remote-code-execution-on-nginx>this security vulnerability</a>.</p>
+<h3>PmWiki Notes</h3>
+<p>The <strong>wiki.d</strong> and <strong>uploads</strong> directories need to be writable by the web server. This can be done by changing the directory's group owner to <strong>www</strong> (or <strong>www-data</strong>) and making sure the directory and its contents are group writable. On a new, fresh installation, you may need to create those directories. On Debian-based systems, the group owner should be www-data. For some reason this is not necessary in your personal web space at freeshell.de.</p>
+<p>In the wiki site's root directory add an index.php file that consists of the following line:</p>
+<pre>
+&lt;?php chdir('pmwiki'); include_once('pmwiki.php');
+</pre>
+<p>Some lines you might want to add to your ../pmwiki/local/config.php file:</p>
+<pre>
+ $ScriptUrl = 'https://wiki.oldfolio.org/';
+ $PubDirUrl = 'https://wiki.oldfolio.org/pmwiki/pub';
+
+ $DefaultPasswords['admin']='$2y$10$QtTlwo1O/5FodNa9M5FZ2.SWdtj6sx60GTUEb5Lh1XJf1piCb949i';
+
+ $DefaultPasswords['edit'] = '@lock';
+
+ date_default_timezone_set('America/New_York');
+</pre>
+<p>So that the password is encrypted when it appears in the config.php file (as above), append to the URL of any of your wiki pages:</p>
+<pre>
+?action=crypt
+</pre>
+<p>Enter the password in the dialog box and hit submit. Then enter the returned string in the passwords line in the config.php file.</p>
+<p>For simplicity of design, I prefer the aptly named <a href="https://pmwiki.org/wiki/Skins/Plain" rel="nofollow" target="_blank">Plain</a> skin.</p>
+<hr>
+<h3>syncthing</h3>
+<p>Syncthing works out of the box under both Debian and FreeBSD.</p>
+<hr>
+<h3>dictd Dictionary Server</h3>
+<p>When you edit the the dictd.conf file you must <strong>RESTART</strong> the dictd server. <strong>RELOAD</strong> will not work.</p>
+<hr>
+<h3>x20go Remote Desktop Server</h3>
+<p>Install x2goserver (might need to get from backports). The remote machine's SSH daemon will need to allow X11Forwarding.</p>
+<pre>
+apt-get -t stretch-backports install x2goserver
+</pre>
+<p>Initialize database.</p>
+<pre>
+x2godbadmin --createdb
+</pre>
+<p>Start or restart the x2go server.</p>
+<pre>
+/etc/init.d/x2goserver restart
+</pre>
+<p>Install a lightweight desktop.</p>
+<pre>
+apt-get install lxde-core
+</pre>
+<p>You will need to install the x2goclient on the machine from which you will be connecting. 1152x864 is a useful remote screen resolution. If the remote user uses any login shell other than /bin/sh, x2go will throw up an error as it is connecting, but the session will still start and run fine. Since x2go uses SSH to connect, you can disable password authentication and just use SSH keys.</p>
+<p>It looks like running X applications is so CPU intensive that doing so on a VPS would interfere with your neighbors.</p>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+</body>
+
+</html>

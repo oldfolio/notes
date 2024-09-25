@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='nice.css' rel='stylesheet' type='text/css'>
+<link rel="shortcut icon" href="favicon.ico" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notes: Emacs</title>
+</head>
+
+<body>
+<h1>Emacs Notes</h1>
+<p>Using <a href="https://blog.einval.eu/2020/04/emacs-as-a-shell/" rel="nofollow" target="_blank">Emacs as a Shell</a> and file manager.</p>
+<p>Your ~/.emacs.d/<a href="dot/emacs.d-init.el.txt">init.el</a> file, your ~/.emacs.d/el/<a href="dot/typopunct.el.txt">typopunct.el</a> file, and your ~/.emacs.d/el/<a href="dot/gopher.el.txt">gopher.el</a> file.</p>
+<p>Open the console version of emacs instead of the X window version:</p>
+<pre>
+emacs -nw
+</pre>
+<p>Under most of your installations, the <strong>Meta</strong> key is the <strong>Esc</strong> key at the upper left of the keyboard.</p>
+<pre>
+Activate menu items: Meta-` [Meta-tickmark (below tilde)]
+Close without saving: Ctrl-x Ctrl-c
+Save: Ctrl-x Ctrl-s
+Save as: Ctrl-x Ctrl-w
+
+Open a man page: Meta-x man
+</pre>
+<p>Cancel a command or close a minibuffer:</p>
+<pre>
+Ctrl-g
+</pre>
+<p>Open file or create new:</p>
+<pre>
+Ctrl-x Ctrl-f
+</pre>
+<p>This can be used to open a file on a remote server. Backspace over the default directory (~/) and enter:</p>
+<pre>
+/[ssh:]user@server.net#port-number:/path/to/file
+</pre>
+<p>Alternatively, you can use the “Host” specified in an SSH config file to identify a remote server:</p>
+<pre>
+/ssh:Host:/path/to/file
+</pre>
+<pre>
+Kill buffer: Ctrl-x k
+List buffers: Ctrl-x Ctrl-b
+Move to previous buffer: Ctrl-x Ctrl-[left-arrow]
+Move to next buffer: Ctrl-x Ctrl-[right-arrow]
+Open second window: Ctrl-x 2
+Move to other window: Ctrl-x o
+Close current window: Ctrl-x 0
+Increase window size: Ctrl-x ^
+Pull up directory listing: Ctrl-x d 
+
+Top of buffer: Meta-&lt; 
+Bottom of buffer: Meta-&gt; 
+Page down: Ctrl-v 
+Page up: Meta-v 
+Beginning of line: Ctrl-a 
+End of line: Ctrl-e 
+Next line: Ctrl-n 
+Previous line: Ctrl-p 
+Forward on character: Ctrl-f 
+Back one character: Ctrl-b 
+Forward one word: Meta-f 
+Back one word: Meta-b 
+</pre>
+<p>Bookmarks</p>
+<pre>
+Set bookmark: Ctrl-x r m 
+List bookmarks: Ctrl-x r l 
+. With list open use "r" to rename a bookmark. 
+. With list open use "d" to mark bookmark for deletion. 
+. With list open use "x" to delete marked bookmark. 
+</pre>
+<p>A red dot in the upper left corner of an Emacs window indicates the presence of a bookmark. See this <a href="https://emacs.stackexchange.com/questions/75158/meaning-of-a-red-dot-on-border-of-window" rel="nofollow" target="_blank">StackExchange discussion</a>.
+
+<p>Cut/Copy/Paste</p> 
+<pre>
+Select text by setting a beginning mark with Ctrl-space, and then 
+moving cursor to end of desired selection. 
+Cut selection: Ctrl-w 
+Copy selection: Meta-w 
+Paste selection: Ctrl-y 
+Merge previous line with current: Meta-^ 
+
+Set text width (i.e. fill column): Ctrl-x f [default is 70] 
+Display column ruler: Meta-x ruler-mode 
+Justify paragraph at 78 characters: Meta-78 Meta-q 
+RE-FILL a paragraph after editing: Meta-q
+
+Undo: Ctrl-x u
+
+Search: Ctrl-s 
+. A subsequent Ctrl-s takes you to the next occurrence 
+. Ctrl-r takes you to the previous occurrence 
+
+Spellchecking
+. Spellcheck word: Meta-$
+. Spellcheck buffer: Meta-x ispell
+
+Center line: Meta-x center-line 
+Meta-l Make word lower case 
+Meta-u Make word upper case 
+Meta-c Capitalize word
+</pre>
+<p>If <em>italic</em> or <strong>bold</strong> faces are not displaying properly, you can examine and change their current settings with:</p>
+<pre>
+Meta-x customize-face
+</pre>
+<h3>Org Mode</h3>
+<p>Org mode files can be exported into a number of external file formats, including ODT. (Note that the zip utility must be installed for the file converter to run.) When you have an org mode file open:</p>
+<pre>
+Ctrl-c Ctrl-e
+</pre>
+<p>will bring up a list of export options.</p>
+<h4>Org Mode: Tables</h4>
+<p>Some links to instructions on working with tables in org mode:</p>
+<ul>
+<li><a href="https://orgmode.org/manual/Tables.html">Org Mode Manual: Tables</a> </li>
+<li><a href="https://orgmode.org/worg/org-tutorials/tables.html">Org Mode Tutorial: Tables</a></li>
+</ul>
+<h3>Calendar Mode / Diary</h3>
+<p>To enter calendar mode:</p>
+<pre>
+Meta-x calendar-mode
+</pre>
+<p>To exit calendar mode:</p>
+<pre>
+q
+</pre>
+<p>By default, the diary file is located at</p>
+<pre>
+~/.emacs.d/diary
+</pre>
+<p>You can set a different location in your ~/.emcas.d/init.el file:</p>
+<pre>
+(setq diary-file "/path/to/alternate-location)
+</pre>
+<p>The <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Diary.html">"Diary" entries</a> in the Emacs manual at gnu.org are very helpful.</p>
+<h3>Gopher Support</h3>
+<p>Add the <a href="dot/gopher.el.txt">gopher.el</a> file to your ~/.emacs.d/el/ directory, and then add the line</p>
+<pre>
+(require 'gopher)
+</pre>
+<p>to your ~/.emacs.d/<a href="dot/emacs.d-init.el.txt">init.el</a> file.</p>
+<p>Use</p>
+<pre>Meta-x gopher</pre>
+<p>to enter gopher mode and prompt to enter a gopher url.</p>
+<p>Use</p>
+<pre>q</pre>
+<p>to exit gopher mode.</p>
+<p>Basic usage guidelines can be found on the <a href="https://github.com/msnyder-info/gopher.el#gopherel">gopher.el github page</a>.</p>
+<h3>Enriched Mode</h3>
+<p>To enter enriched mode, open (i.e. ‘<em>visit</em>’) a new file and type:</p>
+<pre>
+Meta-x enriched-mode
+</pre>
+<p>If you open a file that was saved in enriched mode, it will automatically open in enriched mode. One problem I have run into is that it does not seem possible to edit a compressed file in enriched mode.</p>
+<p>Some enriched mode <a href="https://www.gnu.org/software/emacs/manual/html_node/emacs/Enriched-Faces.html#Enriched-Faces">formatting reminders</a>:</p>
+<pre>
+Meta-o-i   (Italic)  
+Meta-o-b   (Bold)  
+Meta-o-u   (Underline)  
+Meta-o-l   (Bold-Italic)  
+Meta-o-d   (Return to default text format)
+</pre>
+<h3>EWW / Web Browser Mode</h3>
+<p>To open the emacs internal web browser, type:</p>
+<pre>
+Meta-x eww
+</pre>
+<p>You will then be prompted to enter a URL. Use "Meta-x eww" each time you wish to enter a new URL. Some useful commands:</p>
+<pre>
+q = exit browser mode
+l = go to previously loaded page (lower case "L")
+r = go to subsequently loaded page
+d = download
+H = show history
+b = add bookmark
+B = show bookmarks
+C = show cookies
+</pre>
+<h3>Markdown Syntax Highlighting</h3>
+<p>You can add syntax highlighting for Markdown files by installing the Debian package <strong>elpa-markdown-mode</strong>. Once installed, you do not need to do any additional configuration in your init.el file. Emacs will recognize and properly highlight Markdown files.</p>
+<h3>Tramp Mode</h3>
+<p>There are numerous online discussions about how tramp mode frequently locks up your emacs session. There do not seem to be any consistently reliable solutions, even though many long-term, regular users of emacs complain about this issue. One potential remedy is to clear out old cache and connection related junk using the following commands:</p>
+<pre>
+M-x tramp-cleanup-connection      #allows you to close a connection
+M-x tramp-cleanup-all-connections #closes all existing connections
+M-x tramp-cleanup-all-buffers     #does the same, and deletes also related
+buffers
+</pre>
+<p>That last command can be especially useful. Note that deleting the buffer just deletes the open emacs buffer. It does <em>not</em> delete the underlying file.</p>
+<hr>
+<h3>Some init.el tips</h3>
+<p>You can adjust the face/font size, without changing anything else, by adding a line like:</p>
+<pre>
+(set-face-attribute 'default nil :height 140)
+</pre>
+<p>to your init.el file. Height is measured in tenths of a point. So, 140 equals 14 points.</p>
+<br />
+<h5>
+<a href="cli.html">CLI</a> + <a href="dns.html">DNS</a> + <a href="dot.html">Dot Files</a> + <a href="emacs.html">Emacs</a> + <a href="email.html">Email</a> + <a href="links.html">Links</a> + <a href="keys.html">Public Keys</a> + <a href="server.html">Server Notes</a>
+</h5>
+</body>
+
+</html>
