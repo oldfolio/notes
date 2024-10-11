@@ -266,7 +266,7 @@ git status
 <pre>
 git pull [origin master]
 </pre>
-<h5>Hosting Your Own Git Repository</h5>
+<h4>Hosting Your Own Git Repository</h4>
 <p>Create the host repository:</p>
 <pre>
 git init --bare repository-name.git
@@ -279,15 +279,7 @@ git clone username@owl:git/repository-name.git
 <p>where "owl" is the ~/.ssh/config "Host" and "git/repository-name.git"
 is the path to the main repository hosting home, relative to the git-hosting
 user's home directory.</p>
-<p>To view a summary of changes to a file:</p>
-<pre>
-git log relative-path-to/file
-</pre>
-<p>To view the most recent changes to a file:</p>
-<pre>
-git show --pretty=medium relative-path-to/file
-</pre>
-<h5>.git Directories</h5>
+<h4>.git Directories</h4>
 <p>When you run</p>
 <pre>
 git init
@@ -301,6 +293,14 @@ git init --separate-git-dir /path/to/git-directory
 git init --separate-git-dir /path/to/git-directory /path/to/working-directory
 </pre>
 <p>from anywhere if you are not already inside the working directory.</p>
+<p>To view a summary of changes to a file:</p>
+<pre>
+git log relative-path-to/file
+</pre>
+<p>To view the most recent changes to a file:</p>
+<pre>
+git show --pretty=medium relative-path-to/file
+</pre>
 <p><strong>Unrelated Histories</strong></p>
 <p>If you commit two unrelated files in different clones, git will accept the first one you push but reject the second "<em>refusing to merge unrelated histories</em>". You can get around this by running</p>
 <pre>
