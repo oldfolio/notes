@@ -294,8 +294,13 @@ git init
 </pre>
 <p>in a directory, git creates a .git folder immediately inside the top level of your working directory hierarchy. That .git directory houses <em>git's</em> files as opposed to your working files that git is tracking. One option is to have that .git directory housed completely outside of your working directory. To do so, first you will need to manually created the prospective git directory wherever you would like it to reside. Then, in the top level of the working directory, type</p>
 <pre>
-git init --separate-git-dir="/path/to/git-directory"
+git init --separate-git-dir /path/to/git-directory
 </pre>
+<p>Alternatively, you could run</p>
+<pre>
+git init --separate-git-dir /path/to/git-directory /path/to/working-directory
+</pre>
+<p>from anywhere if you are not already inside the working directory.</p>
 <p><strong>Unrelated Histories</strong></p>
 <p>If you commit two unrelated files in different clones, git will accept the first one you push but reject the second "<em>refusing to merge unrelated histories</em>". You can get around this by running</p>
 <pre>
