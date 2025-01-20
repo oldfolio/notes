@@ -147,6 +147,12 @@ dig +dnssec domain.tld dnskey
 <pre>
 dmidecode -t memory
 </pre>
+<h3>DOAS</h3>
+<p>OpenBSD ships with a light-weight alternative to <em>sudo</em>: <a href="https://flak.tedunangst.com/post/doas-mastery" rel="nofollow" target="_blank">doas</a>. My /etc/doas.conf file often looks like:</p>
+<pre>
+permit persist nolog :wheel
+</pre>
+<p>The above line allows members of the <em>wheel</em> group to run commands as root. The <em>persist</em> option tells doas to remember the authenticated user and not require re-entering the user's password for a specified period of time, the default being five minutes. The <em>nolog</em> option tells doas not to log successful command executions.</p>
 <h3>DPKG</h3>
 <p>List installed packages:</p>
 <pre>
