@@ -140,7 +140,15 @@ dig domain.tld dnskey
 dig +dnssec domain.tld dnskey
 </pre>
 <p>and you should an RRSIG reply indicating that your DNS host has signed the domain.</p>
-<p>On Debian-based systems <strong>dig</strong> is supplied by the package <strong>dnsutils</strong>, on FreeBSD by <strong>bind-tools</strong>.</p>
+<p>To check an IP address's RDNS, use:</p>
+<pre>
+dig -x 185.226.149.25
+</pre>
+<p>This will return something like:</p>
+<pre>
+25.149.226.185.in-addr.arpa. 86400 IN   PTR     aibo.runbox.com.
+</pre>
+<p>The <strong>dig</strong> utility is part of the OpenBSD base system. On Debian-based systems <strong>dig</strong> is supplied by the package <strong>dnsutils</strong>, on FreeBSD by <strong>bind-tools</strong>.</p>
 <h3>DMIDECODE</h3>
 <p>Displays hardware information. Must be run as root. See <a href="https://www.howtoforge.com/dmidecode-finding-out-hardware-details-without-opening-the-computer-case">this guide</a>.</p>
 <p>To display memory information:</p>
