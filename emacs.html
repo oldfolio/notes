@@ -91,6 +91,15 @@ Justify paragraph at 78 characters: Meta-78 Meta-q
 RE-FILL a paragraph after editing: Meta-q
 
 Undo: Ctrl-x u
+</pre>
+
+<p>TABS</p>
+<p>By default, when you hit the tab key, Emacs inserts eight spaces, not a real tab. Among other problems, gophermaps do not like that. According to <a href="http://xahlee.info/emacs/emacs/emacs_tabs_space_indentation_setup.html" rel=nofollow" target="_blank">this article</a>, there is no good way to set the tab key to insert tab indentations globally in Emacs. You can, however, use <strong>Ctrl-q TAB</strong> to insert a real tab indentation. If you want to reduce the size of a tab indentation from the equivalent of eight spaces to four, simply add the following line to your ~/.emacs.d/init.el file:</p>
+<pre>
+(setq-default tab-width 4)
+</pre>
+
+<pre>
 
 Search Current Buffer: Ctrl-s 
 . A subsequent Ctrl-s takes you to the next occurrence 
