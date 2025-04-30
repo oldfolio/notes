@@ -1,6 +1,7 @@
 ##  Make a ksh prompt look like a typical bash prompt.
 ##  The following construction works with every variant
-##  of ksh that I have tried: mksh, ksh93, OpenBSD ksh:
+##  of ksh that I have tried: mksh, ksh93, OpenBSD ksh,
+##  and NetBSD ksh:
 PS1="${USER}@`hostname -s`":'$(pwd | sed "s,^$HOME,~,")$ '
 
 #A simple prompt that works with all variants of ksh.
