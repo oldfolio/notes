@@ -1,10 +1,3 @@
-#Make a ksh93 prompt look like a typical bash prompt. This works ONLY with ksh93.
-PS1='$(print -n "${USER}@`hostname -s`:";if  then; print -n "~${PWD#$HOME}"; else; print -n "$PWD";fi;print "$ ")'
-
-#Make NetBSD's /bin/ksh prompt look like a typical bash prompt. Useful at sdf.org.
-export TILDE='~'
-PS1=$USER@$(hostname -s):'${TILDE[(1-0${PWD@([!/]*|$HOME*)}1)]:-}${PWD#$HOME}$ '
-
 #A simple prompt that works with all variants of ksh.
 PS1=$USER@$(hostname -s):'$PWD> '
 
@@ -20,6 +13,17 @@ PS1="\u@\h:\w\\$ "
 # Because pdksh treats $ as a special character when enclosed in
 # double quotation marks, the immediately preceding \ is escaped
 # with another \.
+
+# Make a ksh93 prompt look like a typical bash prompt. The following
+# construction works with both ksh93 and OpenBSD's default ksh:
+PS1="${USER}@`hostname -s`":'$(pwd | sed "s,^$HOME,~,")$ '
+
+OLD KSH93 CONSTRUCTION:
+PS1='$(print -n "${USER}@`hostname -s`:";if  then; print -n "~${PWD#$HOME}"; else; print -n "$PWD";fi;print "$ ")'
+
+#Make NetBSD's /bin/ksh prompt look like a typical bash prompt. Useful at sdf.org.
+export TILDE='~'
+PS1=$USER@$(hostname -s):'${TILDE[(1-0${PWD@([!/]*|$HOME*)}1)]:-}${PWD#$HOME}$ '
 
 #Regardless of how you set your prompt, you may want to add:
 set -o emacs
