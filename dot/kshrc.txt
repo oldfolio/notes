@@ -1,3 +1,8 @@
+##  Make a ksh prompt look like a typical bash prompt.
+##  The following construction works with every variant
+##  of ksh that I have tried: mksh, ksh93, OpenBSD ksh:
+PS1="${USER}@`hostname -s`":'$(pwd | sed "s,^$HOME,~,")$ '
+
 #A simple prompt that works with all variants of ksh.
 PS1=$USER@$(hostname -s):'$PWD> '
 
@@ -13,10 +18,6 @@ PS1="\u@\h:\w\\$ "
 # Because pdksh treats $ as a special character when enclosed in
 # double quotation marks, the immediately preceding \ is escaped
 # with another \.
-
-# Make a ksh93 prompt look like a typical bash prompt. The following
-# construction works with both ksh93 and OpenBSD's default ksh:
-PS1="${USER}@`hostname -s`":'$(pwd | sed "s,^$HOME,~,")$ '
 
 OLD KSH93 CONSTRUCTION:
 PS1='$(print -n "${USER}@`hostname -s`:";if  then; print -n "~${PWD#$HOME}"; else; print -n "$PWD";fi;print "$ ")'
