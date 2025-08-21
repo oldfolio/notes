@@ -220,6 +220,7 @@ git config --global core.excludesFile ~/.gitignore
 <p>Edit locally whatever files you wish to change. To update the remote repository:</p>
 <pre>
 git diff (optional, to see changes)
+git diff -p FILENAME (to see changes to a specific file)
 git add -u # This adds all files that have been updated.
 git add .  # This adds all files in current directory, i.e.
            # untracked files will become tracked files.
@@ -750,13 +751,17 @@ ssh -D 5222 remote-server -N
 -D = bind port
 -N = do not execute a remote command
 </pre>
+<p>To use with the Lynx browser:</p>
+<pre>
+lynx -socks5_proxy=127.0.0.1:5222
+</pre>
 <p>To use with the Chromium browser:</p>
 <pre>
 chromium --proxy-server=socks5://localhost:5222
 </pre>
 <p>To use with Firefox, Pale Moon, etc.:</p>
 <pre>
-Preferences -&gt; Advanced -&gt; Network -&gt; Connection -&gt; Settings
+Preferences -&gt; Settings -&gt; Network Settings -&gt; Connection -&gt; Settings
 
 Manual proxy configuration
 

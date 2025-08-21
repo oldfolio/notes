@@ -11,8 +11,9 @@ body{
   padding: 1em;
   max-width:40em;
   font-size:1.1em;
-  font-family:"FreeSerif","Nimbus Roman No9 L","Times New Roman",Times,serif;
+  /*font-family:"FreeSerif","Nimbus Roman No9 L","Times New Roman",Times,serif;*/
   /*font-family: "Courier Prime", monospace;*/
+  font-family:sans-serif;
   line-height:1.6;
   }
 
